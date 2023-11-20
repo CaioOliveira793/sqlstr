@@ -1,0 +1,24 @@
+[package]
+name = "squeal-builder"
+description = "Squeal (sql) query builder"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+license = "MIT OR Apache-2.0"
+authors = ["Caio Oliveira <caio.vsoliveira23@gmail.com>"]
+
+[lib]
+name = "squeal_builder"
+path = "src/lib.rs"
+
+[features]
+std = ["fmt"]
+fmt = []
+
+[profile.release]
+# Small crate, better code size with 1 codegen
+codegen-units = 1
+
+
+[dev-dependencies]
+sqlx = { version = "0.7.2", default-features = false, features = ["postgres"] }
