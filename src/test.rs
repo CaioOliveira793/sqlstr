@@ -8,7 +8,7 @@ use crate::ArgumentBuffer;
 pub type Esql = SqlError<fmt::Error>;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct TestArgs(String);
+pub struct TestArgs(String, u32);
 
 impl TestArgs {
     pub fn as_str(&self) -> &str {
@@ -31,7 +31,13 @@ where
     type Error = fmt::Error;
 
     fn push(&mut self, value: T) -> Result<(), Self::Error> {
-        self.0.write_fmt(format_args!("{value};"))
+        self.0.write_fmt(format_args!("{value};"))?;
+        self.1 += 1;
+        Ok(())
+    }
+
+    fn count(&self) -> u32 {
+        self.1
     }
 }
 
@@ -42,9 +48,15 @@ where
 {
     let mut buffer = String::new();
     buffer.push('[');
+    let mut iter = iter.into_iter();
+    if let Some(item) = iter.next() {
+        buffer
+            .write_fmt(format_args!("{item}"))
+            .map_err(SqlError::Argument)?;
+    }
     for item in iter {
         buffer
-            .write_fmt(format_args!("{item},"))
+            .write_fmt(format_args!(",{item}"))
             .map_err(SqlError::Argument)?;
     }
     buffer.push(']');

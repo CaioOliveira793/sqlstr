@@ -1,4 +1,3 @@
-#[macro_export]
 macro_rules! display_sql_command {
     ($ty:ident) => {
         #[cfg(feature = "fmt")]
@@ -10,13 +9,14 @@ macro_rules! display_sql_command {
     };
 }
 
-#[macro_export]
 macro_rules! map_intermediate_sql {
     ($ty:ident, $other:ident) => {
         $ty {
             command: $other.command,
-            argument_count: $other.argument_count,
             arguments: $other.arguments,
         }
     };
 }
+
+pub(crate) use display_sql_command;
+pub(crate) use map_intermediate_sql;
