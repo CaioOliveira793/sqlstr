@@ -6,11 +6,13 @@ use crate::ArgumentBuffer;
 
 pub use columns::*;
 pub use from::*;
+pub use join::*;
 pub use macros::*;
 pub use values::*;
 
 mod columns;
 mod from;
+mod join;
 mod macros;
 mod values;
 

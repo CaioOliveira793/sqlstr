@@ -16,6 +16,21 @@ macro_rules! comma_separated {
 #[allow(unused_imports)]
 pub(super) use comma_separated;
 
+/// Comma separated list of shared column names
+#[allow(unused_macros)]
+macro_rules! using {
+    ($first:literal) => {
+        concat!("USING (", $first, ")")
+    };
+
+    ($first:literal, $($column:literal),* $(,)?) => {
+        concat!("USING (", $first, $(", ", $column),*, ")")
+    };
+}
+
+#[allow(unused)]
+pub(super) use using;
+
 #[allow(unused_macros)]
 macro_rules! lock_strength {
     (UPDATE) => {
@@ -244,18 +259,6 @@ macro_rules! join {
     };
 }
 
-/// Comma separated list of shared column names
-#[macro_export]
-macro_rules! using {
-    ($first:literal) => {
-        concat!("USING (", $first, ")")
-    };
-
-    ($first:literal, $($column:literal),* $(,)?) => {
-        concat!("USING (", $first, $(", ", $column),*, ")")
-    };
-}
-
 #[macro_export]
 macro_rules! group_by {
     ($first:literal$(,)? $($column:literal),* $(,)?) => {
@@ -362,15 +365,15 @@ macro_rules! locking {
 
 // TODO: create select!() macro to build a sql command in compile-time
 
+pub use static_columns;
+pub use static_tables;
+
 pub use columns;
 pub use comparison;
 pub use condition;
 pub use join;
 pub use locking;
-pub use static_columns;
-pub use static_tables;
 pub use tables;
-pub use using;
 
 #[cfg(test)]
 mod test {

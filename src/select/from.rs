@@ -7,12 +7,12 @@ use crate::{
     SqlCommand,
 };
 
+/// Starts a `FROM` section to push table names
 pub struct FromTable<Arg> {
     pub(super) command: String,
     pub(super) arguments: Arg,
 }
 
-/// Starts a `FROM` section to push table names
 impl<Arg> FromTable<Arg> {
     pub fn from<EArg>(mut self, table: &str) -> Result<Self, SqlError<EArg>> {
         self.command.push(',');

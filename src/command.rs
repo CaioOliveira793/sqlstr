@@ -1,8 +1,5 @@
 use alloc::string::String;
 
-#[cfg(feature = "fmt")]
-use core::fmt::{self, Display};
-
 use crate::macros::display_sql_command;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
