@@ -13,53 +13,96 @@ pub fn select<Arg>(arguments: Arg) -> Select<Arg> {
     Select::new(arguments)
 }
 
+pub fn select_all<Arg>(arguments: Arg) -> Select<Arg> {
+    Select::all(arguments)
+}
+
+pub fn select_distinct<Arg>(arguments: Arg) -> Select<Arg> {
+    Select::distinct(arguments)
+}
+
 pub struct Select<Arg> {
     command: String,
     arguments: Arg,
 }
 
 impl<Arg> Select<Arg> {
-    pub fn new(arguments: Arg) -> Self {
+    /// SELECT
+    ///
+    /// The select command retrieves rows from zero or more tables.
+    fn new(arguments: Arg) -> Self {
         Self {
             arguments,
             command: String::from("SELECT"),
         }
     }
 
-    pub fn column<EArg>(mut self, column: &str) -> Result<PushColumn<Arg>, SqlError<EArg>> {
-        self.command.try_reserve(column.len() + 1)?;
-        self.command.push(' ');
-        self.command.push_str(column);
-        Ok(map_intermediate_sql!(PushColumn, self))
-    }
-
-    pub fn columns<EArg>(mut self, columns: &[&str]) -> Result<PushColumn<Arg>, SqlError<EArg>> {
-        // each column + ", " - 1 (for the first, which only use a ' ')
-        let total_length = columns.iter().map(|s| s.len() + 2).sum::<usize>() - 1;
-        self.command.try_reserve(total_length)?;
-
-        let first = columns.first().ok_or(SqlError::ArgumentNotFound)?;
-        self.command.push(' ');
-        self.command.push_str(first);
-
-        for column in &columns[1..] {
-            self.command.push_str(", ");
-            self.command.push_str(column);
+    /// SELECT ALL
+    ///
+    /// The select query will return all the candidate rows, including duplicates.
+    ///
+    /// Generally the database default
+    fn all(arguments: Arg) -> Self {
+        Self {
+            arguments,
+            command: String::from("SELECT ALL"),
         }
-
-        Ok(map_intermediate_sql!(PushColumn, self))
     }
 
-    pub fn static_columns<EArg>(
-        mut self,
-        columns: Columns,
-    ) -> Result<FromTable<Arg>, SqlError<EArg>> {
-        self.command.try_reserve(columns.0.len())?;
+    /// SELECT DISTINCT|DISTINCT ROW
+    ///
+    /// The select query will return only the distinct cantidate rows, eliminating duplicates.
+    fn distinct(arguments: Arg) -> Self {
+        Self {
+            arguments,
+            command: String::from("SELECT DISTINCT"),
+        }
+    }
 
-        self.command.push(' ');
-        self.command.push_str(columns.0);
+    /// Add a column into the SELECT command
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # use squeal_builder::select::*;
+    /// let cmd = select(arguments)
+    ///     .column("first_name")?
+    ///     .column("last_name")?
+    ///     .end();
+    /// ```
+    pub fn column<EArg>(self, column: &str) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        let select_column = map_intermediate_sql!(SelectColumn, self);
+        select_column.column(column)
+    }
 
-        Ok(map_intermediate_sql!(FromTable, self))
+    /// Add a column with a alias into the SELECT command
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # use squeal_builder::select::*;
+    /// let cmd = select(arguments)
+    ///     .column_as("firstName", "first_name")?
+    ///     .column_as("lasttName", "lastt_name")?
+    ///     .end();
+    /// ```
+    pub fn column_as<EArg>(
+        self,
+        column: &str,
+        alias: &str,
+    ) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        let select_column = map_intermediate_sql!(SelectColumn, self);
+        select_column.column_as(column, alias)
+    }
+
+    pub fn columns<EArg>(self, columns: &[&str]) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        let select_column = map_intermediate_sql!(SelectColumn, self);
+        select_column.columns(columns)
+    }
+
+    pub fn static_columns<EArg>(self, columns: Columns) -> Result<FromTable<Arg>, SqlError<EArg>> {
+        let select_column = map_intermediate_sql!(SelectColumn, self);
+        select_column.static_columns(columns)
     }
 
     pub fn value<T>(
@@ -109,6 +152,84 @@ impl<Arg> Select<Arg> {
 }
 
 display_sql_command!(Select);
+
+pub struct SelectColumn<Arg> {
+    command: String,
+    arguments: Arg,
+}
+
+impl<Arg> SelectColumn<Arg> {
+    /// Add a column into the SELECT command
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # use squeal_builder::select::*;
+    /// let cmd = select(arguments)
+    ///     .column("first_name")?
+    ///     .column("first_name")?
+    ///     .end();
+    /// ```
+    pub fn column<EArg>(mut self, column: &str) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        self.command.try_reserve(column.len() + 1)?;
+        self.command.push(' ');
+        self.command.push_str(column);
+        Ok(map_intermediate_sql!(PushColumn, self))
+    }
+
+    /// Add a column with a alias into the SELECT command
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// # use squeal_builder::select::*;
+    /// let cmd = select(arguments)
+    ///     .column_as("firstName", "first_name")?
+    ///     .column_as("firstName", "first_name")?
+    ///     .end();
+    /// ```
+    pub fn column_as<EArg>(
+        mut self,
+        column: &str,
+        alias: &str,
+    ) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        self.command.try_reserve(column.len() + alias.len() + 5)?;
+        self.command.push(' ');
+        self.command.push_str(column);
+        self.command.push_str(" AS ");
+        self.command.push_str(alias);
+        Ok(map_intermediate_sql!(PushColumn, self))
+    }
+
+    pub fn columns<EArg>(mut self, columns: &[&str]) -> Result<PushColumn<Arg>, SqlError<EArg>> {
+        // each column + ", " - 1 (for the first, which only use a ' ')
+        let total_length = columns.iter().map(|s| s.len() + 2).sum::<usize>() - 1;
+        self.command.try_reserve(total_length)?;
+
+        let first = columns.first().ok_or(SqlError::ArgumentNotFound)?;
+        self.command.push(' ');
+        self.command.push_str(first);
+
+        for column in &columns[1..] {
+            self.command.push_str(", ");
+            self.command.push_str(column);
+        }
+
+        Ok(map_intermediate_sql!(PushColumn, self))
+    }
+
+    pub fn static_columns<EArg>(
+        mut self,
+        columns: Columns,
+    ) -> Result<FromTable<Arg>, SqlError<EArg>> {
+        self.command.try_reserve(columns.0.len())?;
+
+        self.command.push(' ');
+        self.command.push_str(columns.0);
+
+        Ok(map_intermediate_sql!(FromTable, self))
+    }
+}
 
 pub struct PushValue<Arg> {
     command: String,
