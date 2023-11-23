@@ -3,38 +3,24 @@ use crate::test::*;
 use crate::*;
 
 #[test]
-fn select_column_single() {
+fn select_column() {
     fn cmd() -> Result<SqlCommand<TestArgs>, Esql> {
         let args = TestArgs::default();
         let sql = select(args)
             .column(User::Id.as_str())?
-            .column(User::Created.as_str())?
+            .column_as(User::Created.as_str(), "created_at")?
             .column(User::Name.as_str())?
-            .from_table(User::TABLE)?
+            .from(User::TABLE)?
             .end();
         Ok(sql)
     }
 
     let sql = cmd().unwrap();
 
-    assert_eq!(sql.command, "SELECT id, created, name FROM user");
-    assert_eq!(sql.arguments.as_str(), "");
-}
-
-#[test]
-fn select_columns_slice() {
-    fn cmd() -> Result<SqlCommand<TestArgs>, Esql> {
-        let args = TestArgs::default();
-        let sql = select(args)
-            .columns(&User::COLUMNS)?
-            .from_table(User::table())?
-            .end();
-        Ok(sql)
-    }
-
-    let sql = cmd().unwrap();
-
-    assert_eq!(sql.command, "SELECT id, created, name FROM user");
+    assert_eq!(
+        sql.command,
+        "SELECT id, created AS created_at, name FROM user"
+    );
     assert_eq!(sql.arguments.as_str(), "");
 }
 
@@ -44,7 +30,7 @@ fn select_static_columns() {
         let args = TestArgs::default();
         let sql = select(args)
             .static_columns(columns!("id", "created", "name"))?
-            .from_table(User::table())?
+            .from(User::table())?
             .end();
         Ok(sql)
     }
@@ -59,7 +45,7 @@ fn select_static_columns() {
 fn select_values_iter() {
     fn cmd() -> Result<SqlCommand<TestArgs>, Esql> {
         let args = TestArgs::default();
-        let sql = select(args).values([10, -100, 0])?;
+        let sql = select(args).values([10, -100, 0])?.end();
         Ok(sql)
     }
 
@@ -94,7 +80,7 @@ fn select_static_from_tables() {
         let args = TestArgs::default();
         let sql = select(args)
             .column("name")?
-            .static_from_tables(tables!("user", "product"))?
+            .static_from(tables!("user", "product"))?
             .end();
         Ok(sql)
     }

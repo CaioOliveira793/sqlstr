@@ -17,6 +17,25 @@ macro_rules! comma_separated {
 pub(super) use comma_separated;
 
 #[allow(unused_macros)]
+macro_rules! lock_strength {
+    (UPDATE) => {
+        "UPDATE"
+    };
+    (NO_KEY_UPDATE) => {
+        "NO KEY UPDATE"
+    };
+    (SHARE) => {
+        "SHARE"
+    };
+    (KEY_SHARE) => {
+        "KEY SHARE"
+    };
+}
+
+#[allow(unused)]
+pub(super) use lock_strength;
+
+#[allow(unused_macros)]
 macro_rules! logical_op {
     (AND) => {
         "AND"
@@ -305,25 +324,6 @@ macro_rules! limit {
     };
 }
 
-#[allow(unused_macros)]
-macro_rules! lock_strength {
-    (UPDATE) => {
-        "UPDATE"
-    };
-    (NO_KEY_UPDATE) => {
-        "NO KEY UPDATE"
-    };
-    (SHARE) => {
-        "SHARE"
-    };
-    (KEY_SHARE) => {
-        "KEY SHARE"
-    };
-}
-
-#[allow(unused)]
-pub(super) use lock_strength;
-
 #[macro_export]
 macro_rules! locking {
     (FOR $s1:tt) => {
@@ -338,14 +338,14 @@ macro_rules! locking {
             $(", ", $col),*
         )
     };
-    (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),* NO WAIT) => {
+    (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),* NOWAIT) => {
         concat!(
             "FOR ",
             $crate::select::lock_strength!($s1),
             " OF ",
             $fcol,
             $(", ", $col),*,
-            " NO WAIT"
+            " NOWAIT"
         )
     };
     (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),* SKIP LOCKED) => {
@@ -540,20 +540,20 @@ mod test {
         );
 
         assert_eq!(
-            locking!(FOR UPDATE OF "user", "access", "customer" NO WAIT),
-            "FOR UPDATE OF user, access, customer NO WAIT"
+            locking!(FOR UPDATE OF "user", "access", "customer" NOWAIT),
+            "FOR UPDATE OF user, access, customer NOWAIT"
         );
         assert_eq!(
-            locking!(FOR NO_KEY_UPDATE OF "user", "access", "customer" NO WAIT),
-            "FOR NO KEY UPDATE OF user, access, customer NO WAIT"
+            locking!(FOR NO_KEY_UPDATE OF "user", "access", "customer" NOWAIT),
+            "FOR NO KEY UPDATE OF user, access, customer NOWAIT"
         );
         assert_eq!(
-            locking!(FOR SHARE OF "user", "access", "customer" NO WAIT),
-            "FOR SHARE OF user, access, customer NO WAIT"
+            locking!(FOR SHARE OF "user", "access", "customer" NOWAIT),
+            "FOR SHARE OF user, access, customer NOWAIT"
         );
         assert_eq!(
-            locking!(FOR KEY_SHARE OF "user", "access", "customer" NO WAIT),
-            "FOR KEY SHARE OF user, access, customer NO WAIT"
+            locking!(FOR KEY_SHARE OF "user", "access", "customer" NOWAIT),
+            "FOR KEY SHARE OF user, access, customer NOWAIT"
         );
 
         assert_eq!(

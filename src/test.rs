@@ -72,12 +72,6 @@ pub enum User {
 impl User {
     pub const TABLE: &str = "user";
 
-    pub const COLUMNS: [&str; 3] = [
-        Self::Id.as_str(),
-        Self::Created.as_str(),
-        Self::Name.as_str(),
-    ];
-
     pub const fn table() -> &'static str {
         Self::TABLE
     }
