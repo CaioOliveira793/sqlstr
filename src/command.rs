@@ -22,6 +22,8 @@ pub trait WriteSql<Arg> {
         Arg: ArgumentBuffer<T>;
 
     fn push_cmd(&mut self, expr: &str);
+
+    fn as_command(&self) -> &str;
 }
 
 #[cfg_attr(feature = "fmt", derive(Debug))]
@@ -99,6 +101,10 @@ impl<Arg> WriteSql<Arg> for SqlCommand<Arg> {
 
     fn push_cmd(&mut self, expr: &str) {
         SqlCommand::push_cmd(self, expr)
+    }
+
+    fn as_command(&self) -> &str {
+        self.command.as_str()
     }
 }
 

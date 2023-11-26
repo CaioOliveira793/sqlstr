@@ -43,6 +43,10 @@ where
     fn push_cmd(&mut self, expr: &str) {
         self.0.push_cmd(expr)
     }
+
+    fn as_command(&self) -> &str {
+        self.0.as_command()
+    }
 }
 
 impl<'cmd, Sql, Arg> Drop for Group<'cmd, Sql, Arg>
