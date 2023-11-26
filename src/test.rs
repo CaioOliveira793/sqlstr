@@ -11,6 +11,10 @@ pub type Esql = SqlError<fmt::Error>;
 pub struct TestArgs(String, u32);
 
 impl TestArgs {
+    pub const fn new() -> Self {
+        Self(String::new(), 0)
+    }
+
     pub fn as_str(&self) -> &str {
         &self.0
     }
