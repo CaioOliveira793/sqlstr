@@ -9,7 +9,6 @@ mod macros;
 pub mod ast;
 pub mod error;
 pub mod select;
-pub mod util;
 
 pub use command::*;
 
