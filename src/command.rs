@@ -28,7 +28,7 @@ pub trait WriteSql<Arg> {
 }
 
 /// SQL Fragment
-#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SqlExpr<'ex, T> {
     /// Value of a sql command argument.
@@ -45,7 +45,7 @@ pub const fn sqlvalue<T>(expr: T) -> SqlExpr<'static, T> {
     SqlExpr::Value(expr)
 }
 
-#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Clone, Default, PartialEq, Eq)]
 pub struct SqlCommand<Arg> {
     pub command: String,
@@ -118,7 +118,7 @@ display_sql_command!(SqlCommand);
 /// Void argument buffer
 ///
 /// This [ArgumentBuffer] does not hold any argument written.
-#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Void(u32);
 
