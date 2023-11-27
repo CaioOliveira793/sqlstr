@@ -1,4 +1,5 @@
 use alloc::string::String;
+use core::convert::Infallible;
 
 use crate::{format_num::format_u32_base10, macros::display_sql_command};
 
@@ -110,3 +111,37 @@ impl<Arg> WriteSql<Arg> for SqlCommand<Arg> {
 }
 
 display_sql_command!(SqlCommand);
+
+/// Void argument buffer
+///
+/// This [ArgumentBuffer] does not hold any argument written.
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Void(u32);
+
+impl Void {
+    pub const fn new() -> Self {
+        Self(0)
+    }
+
+    pub const fn with_count(count: u32) -> Self {
+        Self(count)
+    }
+
+    pub const fn count(&self) -> u32 {
+        self.0
+    }
+}
+
+impl<T> ArgumentBuffer<T> for Void {
+    type Error = Infallible;
+
+    fn push(&mut self, _: T) -> Result<(), Self::Error> {
+        self.0 += 1;
+        Ok(())
+    }
+
+    fn count(&self) -> u32 {
+        self.0
+    }
+}
