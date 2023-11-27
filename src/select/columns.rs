@@ -13,13 +13,17 @@ impl<Arg> SelectColumn<Arg> {
     ///
     /// # Example
     ///
-    /// ```ignore
-    /// # use squeal_builder::select::*;
-    /// let cmd = select(arguments)
+    /// ```
+    /// # use squeal_builder::{select::*, Void, error::SqlError};
+    /// # use core::convert::Infallible;
+    /// # fn main() -> Result<(), SqlError<Infallible>> {
+    /// let cmd = select(Void::new())
     ///     .column("first_name")?
     ///     .column("last_name")?;
     ///
     /// assert_eq!(cmd.as_str(), "SELECT first_name, last_name");
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn column<EArg>(mut self, column: &str) -> Result<Self, SqlError<EArg>> {
         self.command.push(',');
@@ -37,13 +41,17 @@ impl<Arg> SelectColumn<Arg> {
     ///
     /// # Example
     ///
-    /// ```ignore
-    /// # use squeal_builder::select::*;
-    /// let cmd = select(arguments)
+    /// ```
+    /// # use squeal_builder::{select::*, Void, error::SqlError};
+    /// # use core::convert::Infallible;
+    /// # fn main() -> Result<(), SqlError<Infallible>> {
+    /// let cmd = select(Void::new())
     ///     .column_as("firstName", "first_name")?
     ///     .column_as("lastName", "last_name")?;
     ///
     /// assert_eq!(cmd.as_str(), "SELECT firstName AS first_name, lastName AS last_name");
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn column_as<EArg>(mut self, column: &str, alias: &str) -> Result<Self, SqlError<EArg>> {
         self.command.push(',');
@@ -88,5 +96,9 @@ impl<Arg> SelectColumn<Arg> {
         let mut sql = map_intermediate_sql!(FromTable, self);
         sql.command.push_str(" FROM");
         sql.transition_static_from(tables)
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.command
     }
 }

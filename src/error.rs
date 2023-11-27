@@ -3,7 +3,7 @@ use alloc::collections::TryReserveError;
 #[cfg(feature = "std")]
 use std::error::Error;
 
-#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Clone, PartialEq, Eq)]
 pub enum SqlError<EArg> {
     CommandBuffer(TryReserveError),

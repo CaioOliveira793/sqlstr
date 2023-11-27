@@ -29,36 +29,8 @@ macro_rules! sql_expr {
     };
 }
 
-#[macro_export]
-macro_rules! cast {
-    ($expr:literal AS $ty:literal) => {
-        concat!("CAST (", $expr, " AS ", $ty, ")")
-    };
-    (expr($expr:expr) AS $ty:expr) => {
-        (
-            $crate::command::SqlExpr::Expr("CAST (") as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr($expr) as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr(" AS ") as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr($ty) as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr(")") as $crate::command::SqlExpr<'_, ()>,
-        )
-    };
-    (val($expr:expr) AS $ty:expr) => {
-        (
-            $crate::command::SqlExpr::Expr("CAST (") as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Value($expr),
-            $crate::command::SqlExpr::Expr(" AS ") as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr($ty) as $crate::command::SqlExpr<'_, ()>,
-            $crate::command::SqlExpr::Expr(")") as $crate::command::SqlExpr<'_, ()>,
-        )
-    };
-}
-
-pub use cast;
-
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::command::SqlExpr;
     use SqlExpr::*;
 
@@ -87,56 +59,5 @@ mod test {
         //     )
         // );
         // assert_eq!(sql_expr!(val("Rust")), (Value("Rust")));
-    }
-
-    #[test]
-    fn cast() {
-        let cast_type = "INTEGER";
-        let val = 8923;
-        let expression = "Rust";
-
-        assert_eq!(
-            cast!(expr(expression) AS cast_type),
-            (
-                Expr("CAST ("),
-                Expr(expression),
-                Expr(" AS "),
-                Expr(cast_type),
-                Expr(")")
-            )
-        );
-
-        assert_eq!(
-            cast!(expr(if false { expression } else { "DATE::NOW()" }) AS cast_type),
-            (
-                Expr("CAST ("),
-                Expr("DATE::NOW()"),
-                Expr(" AS "),
-                Expr(cast_type),
-                Expr(")")
-            )
-        );
-
-        assert_eq!(
-            cast!(val(if false { val } else { 102 }) AS "TEXT"),
-            (
-                Expr("CAST ("),
-                Value(102),
-                Expr(" AS "),
-                Expr("TEXT"),
-                Expr(")")
-            )
-        );
-
-        assert_eq!(
-            cast!(val(val) AS cast_type),
-            (
-                Expr("CAST ("),
-                Value(val),
-                Expr(" AS "),
-                Expr(cast_type),
-                Expr(")")
-            )
-        );
     }
 }

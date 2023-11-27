@@ -27,10 +27,13 @@ pub trait WriteSql<Arg> {
     fn as_command(&self) -> &str;
 }
 
+/// SQL Fragment
 #[cfg_attr(any(feature = "fmt", test), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SqlExpr<'ex, T> {
+    /// Value of a sql command argument.
     Value(T),
+    /// Expression of a sql command.
     Expr(&'ex str),
 }
 
