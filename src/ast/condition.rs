@@ -8,7 +8,7 @@ use crate::{ArgumentBuffer, WriteSql};
 /// Postgres comparison operators
 ///
 /// https://www.postgresql.org/docs/current/functions-comparison.html
-#[cfg_attr(feature = "fmt", derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ComparisonOp {
     Equal,

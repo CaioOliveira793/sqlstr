@@ -1,12 +1,10 @@
 use alloc::collections::TryReserveError;
 
-#[cfg(feature = "fmt")]
-use core::fmt::{self, Display};
-
 #[cfg(feature = "std")]
 use std::error::Error;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[derive(Clone, PartialEq, Eq)]
 pub enum SqlError<EArg> {
     CommandBuffer(TryReserveError),
     Argument(EArg),
@@ -19,9 +17,9 @@ impl<ArgErr> From<TryReserveError> for SqlError<ArgErr> {
     }
 }
 
-#[cfg(feature = "fmt")]
-impl<ArgErr> Display for SqlError<ArgErr> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+#[cfg(any(feature = "fmt", test))]
+impl<ArgErr> core::fmt::Display for SqlError<ArgErr> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::CommandBuffer(_) => f.write_str("sql command"),
             Self::Argument(_) => f.write_str("sql argument"),

@@ -26,8 +26,8 @@ pub trait WriteSql<Arg> {
     fn as_command(&self) -> &str;
 }
 
-#[cfg_attr(feature = "fmt", derive(Debug))]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SqlExpr<'ex, T> {
     Value(T),
     Expr(&'ex str),
@@ -41,7 +41,8 @@ pub const fn sqlvalue<T>(expr: T) -> SqlExpr<'static, T> {
     SqlExpr::Value(expr)
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
+#[derive(Clone, Default, PartialEq, Eq)]
 pub struct SqlCommand<Arg> {
     pub command: String,
     pub arguments: Arg,

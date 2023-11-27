@@ -1,6 +1,6 @@
 macro_rules! display_sql_command {
     ($ty:ident) => {
-        #[cfg(feature = "fmt")]
+        #[cfg(any(feature = "fmt", test))]
         impl<Arg> core::fmt::Display for $ty<Arg> {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 self.command.fmt(f)

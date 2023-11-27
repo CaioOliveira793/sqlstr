@@ -1,7 +1,7 @@
 use alloc::{borrow::Cow, string::String, vec::Vec};
 use core::{borrow::Borrow, ops::Deref};
 
-#[cfg_attr(feature = "fmt", derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ColumnExpr<'c>(Cow<'c, str>);
 
@@ -40,7 +40,7 @@ impl<'c> Deref for ColumnExpr<'c> {
     }
 }
 
-#[cfg_attr(feature = "fmt", derive(Debug))]
+#[cfg_attr(any(feature = "fmt", test), derive(Debug))]
 pub struct ColumnExprList<'c>(Vec<Cow<'c, str>>);
 
 pub const fn column_list<'c>() -> ColumnExprList<'c> {
