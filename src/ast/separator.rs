@@ -8,7 +8,7 @@ use crate::command::WriteSql;
 /// The separator is only added if not preceded at the end of the sql command.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_option};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -17,7 +17,7 @@ use crate::command::WriteSql;
 /// sql.push_cmd(",   ");
 /// assert_eq!(sql.as_command(), "SELECT $1,   ");
 ///
-/// item_separator_option(&mut sql);
+/// item_separator_optional(&mut sql);
 /// assert_eq!(sql.as_command(), "SELECT $1,   ");
 /// # Ok(())
 /// # }
@@ -26,7 +26,7 @@ use crate::command::WriteSql;
 /// In case the item separator (`','`) is present, only a space (`' '`) is added.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_option};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -35,7 +35,7 @@ use crate::command::WriteSql;
 /// sql.push_cmd(",");
 /// assert_eq!(sql.as_command(), "SELECT $1,");
 ///
-/// item_separator_option(&mut sql);
+/// item_separator_optional(&mut sql);
 /// assert_eq!(sql.as_command(), "SELECT $1, ");
 /// # Ok(())
 /// # }
@@ -44,23 +44,27 @@ use crate::command::WriteSql;
 /// When the sql buffer does not end with an item separator, one is added.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_option};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
 /// sql.push_cmd("SELECT ");
 /// sql.push_value(-1);
-/// item_separator_option(&mut sql);
+/// item_separator_optional(&mut sql);
 /// sql.push_value("Rust");
 ///
 /// assert_eq!(sql.as_command(), "SELECT $1, $2");
 /// # Ok(())
 /// # }
 /// ```
-pub fn item_separator_option<Sql, Arg>(sql: &mut Sql)
+pub fn item_separator_optional<Sql, Arg>(sql: &mut Sql)
 where
     Sql: WriteSql<Arg>,
 {
+    if sql.as_command().is_empty() {
+        return;
+    }
+
     // "SELECT $1,"
     if sql.as_command().ends_with(',') {
         sql.push_cmd(" ");
@@ -104,28 +108,32 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::separator_option};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
 /// sql.push_cmd("SELECT");
-/// separator_option(&mut sql);
+/// separator_optional(&mut sql);
 /// sql.push_value(47)?;
 ///
 /// assert_eq!(sql.as_command(), "SELECT $1");
 ///
 /// sql.push_cmd(", ");
-/// separator_option(&mut sql);
+/// separator_optional(&mut sql);
 /// sql.push_value(53)?;
 ///
 /// assert_eq!(sql.as_command(), "SELECT $1, $2");
 /// # Ok(())
 /// # }
 /// ```
-pub fn separator_option<Sql, Arg>(sql: &mut Sql)
+pub fn separator_optional<Sql, Arg>(sql: &mut Sql)
 where
     Sql: WriteSql<Arg>,
 {
+    if sql.as_command().is_empty() {
+        return;
+    }
+
     if !sql.as_command().ends_with(' ') {
         sql.push_cmd(" ");
     }

@@ -32,25 +32,6 @@ macro_rules! using {
 pub(super) use using;
 
 #[allow(unused_macros)]
-macro_rules! lock_strength {
-    (UPDATE) => {
-        "UPDATE"
-    };
-    (NO_KEY_UPDATE) => {
-        "NO KEY UPDATE"
-    };
-    (SHARE) => {
-        "SHARE"
-    };
-    (KEY_SHARE) => {
-        "KEY SHARE"
-    };
-}
-
-#[allow(unused)]
-pub(super) use lock_strength;
-
-#[allow(unused_macros)]
 macro_rules! logical_op {
     (AND) => {
         "AND"
@@ -289,6 +270,7 @@ macro_rules! grouping_element {
 }
 
 // TODO: support ORDER BY x DESC, y DESC NULL FIRST, z ASC, a USING > NULL LAST
+#[allow(unused_macros)]
 macro_rules! order_by {
     ($col_expr:literal ASC) => {
         concat!("ORDER BY ", $col_expr, " ASC")
@@ -321,45 +303,10 @@ macro_rules! order_by {
 }
 
 // TODO: https://www.postgresql.org/docs/current/sql-select.html#SQL-LIMIT
+#[allow(unused_macros)]
 macro_rules! limit {
     (ALL) => {
         "LIMIT ALL"
-    };
-}
-
-#[macro_export]
-macro_rules! locking {
-    (FOR $s1:tt) => {
-        concat!("FOR ", $crate::select::lock_strength!($s1))
-    };
-    (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),*) => {
-        concat!(
-            "FOR ",
-            $crate::select::lock_strength!($s1),
-            " OF ",
-            $fcol,
-            $(", ", $col),*
-        )
-    };
-    (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),* NOWAIT) => {
-        concat!(
-            "FOR ",
-            $crate::select::lock_strength!($s1),
-            " OF ",
-            $fcol,
-            $(", ", $col),*,
-            " NOWAIT"
-        )
-    };
-    (FOR $s1:tt OF $fcol:literal$(,)? $($col:literal),* SKIP LOCKED) => {
-        concat!(
-            "FOR ",
-            $crate::select::lock_strength!($s1),
-            " OF ",
-            $fcol,
-            $(", ", $col),*,
-            " SKIP LOCKED"
-        )
     };
 }
 
@@ -372,7 +319,6 @@ pub use columns;
 pub use comparison;
 pub use condition;
 pub use join;
-pub use locking;
 pub use tables;
 
 #[cfg(test)]
@@ -507,73 +453,6 @@ mod test {
         assert_eq!(
             join!(FULL "user" ON "user.id" = "access_history.user_id" OR "user.updated" < "access_history.created"),
             "FULL JOIN user ON user.id = access_history.user_id OR user.updated < access_history.created"
-        );
-    }
-
-    #[test]
-    fn locking_test() {
-        assert_eq!(locking!(FOR UPDATE), "FOR UPDATE");
-        assert_eq!(locking!(FOR NO_KEY_UPDATE), "FOR NO KEY UPDATE");
-        assert_eq!(locking!(FOR SHARE), "FOR SHARE");
-        assert_eq!(locking!(FOR KEY_SHARE), "FOR KEY SHARE");
-
-        assert_eq!(locking!(FOR UPDATE OF "user"), "FOR UPDATE OF user");
-        assert_eq!(
-            locking!(FOR NO_KEY_UPDATE OF "user"),
-            "FOR NO KEY UPDATE OF user"
-        );
-        assert_eq!(locking!(FOR SHARE OF "user"), "FOR SHARE OF user");
-        assert_eq!(locking!(FOR KEY_SHARE OF "user"), "FOR KEY SHARE OF user");
-
-        assert_eq!(
-            locking!(FOR UPDATE OF "user", "access", "customer"),
-            "FOR UPDATE OF user, access, customer"
-        );
-        assert_eq!(
-            locking!(FOR NO_KEY_UPDATE OF "user", "access", "customer"),
-            "FOR NO KEY UPDATE OF user, access, customer"
-        );
-        assert_eq!(
-            locking!(FOR SHARE OF "user", "access", "customer"),
-            "FOR SHARE OF user, access, customer"
-        );
-        assert_eq!(
-            locking!(FOR KEY_SHARE OF "user", "access", "customer"),
-            "FOR KEY SHARE OF user, access, customer"
-        );
-
-        assert_eq!(
-            locking!(FOR UPDATE OF "user", "access", "customer" NOWAIT),
-            "FOR UPDATE OF user, access, customer NOWAIT"
-        );
-        assert_eq!(
-            locking!(FOR NO_KEY_UPDATE OF "user", "access", "customer" NOWAIT),
-            "FOR NO KEY UPDATE OF user, access, customer NOWAIT"
-        );
-        assert_eq!(
-            locking!(FOR SHARE OF "user", "access", "customer" NOWAIT),
-            "FOR SHARE OF user, access, customer NOWAIT"
-        );
-        assert_eq!(
-            locking!(FOR KEY_SHARE OF "user", "access", "customer" NOWAIT),
-            "FOR KEY SHARE OF user, access, customer NOWAIT"
-        );
-
-        assert_eq!(
-            locking!(FOR UPDATE OF "user", "access", "customer" SKIP LOCKED),
-            "FOR UPDATE OF user, access, customer SKIP LOCKED"
-        );
-        assert_eq!(
-            locking!(FOR NO_KEY_UPDATE OF "user", "access", "customer" SKIP LOCKED),
-            "FOR NO KEY UPDATE OF user, access, customer SKIP LOCKED"
-        );
-        assert_eq!(
-            locking!(FOR SHARE OF "user", "access", "customer" SKIP LOCKED),
-            "FOR SHARE OF user, access, customer SKIP LOCKED"
-        );
-        assert_eq!(
-            locking!(FOR KEY_SHARE OF "user", "access", "customer" SKIP LOCKED),
-            "FOR KEY SHARE OF user, access, customer SKIP LOCKED"
         );
     }
 }
