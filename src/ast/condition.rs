@@ -2,8 +2,8 @@
 //!
 //! https://www.postgresql.org/docs/current/functions.html
 
-use crate::command::SqlExpr;
-use crate::{ArgumentBuffer, WriteSql};
+use super::separator_optional;
+use crate::command::{ArgumentBuffer, SqlExpr, WriteSql};
 
 /// Postgres comparison operators
 ///
@@ -108,11 +108,10 @@ where
     Sql: WriteSql<Arg>,
     Arg: ArgumentBuffer<T>,
 {
-    sql.push_cmd(" ");
+    separator_optional(sql);
     sql.push_cmd(op.as_str());
     sql.push_cmd(" ");
-    sql.push_expr(rhs)?;
-    Ok(())
+    sql.push_expr(rhs)
 }
 
 pub fn push_logic<Sql, Arg, T>(
@@ -124,11 +123,10 @@ where
     Sql: WriteSql<Arg>,
     Arg: ArgumentBuffer<T>,
 {
-    sql.push_cmd(" ");
+    separator_optional(sql);
     sql.push_cmd(op.as_str());
     sql.push_cmd(" ");
-    sql.push_expr(rhs)?;
-    Ok(())
+    sql.push_expr(rhs)
 }
 
 #[cfg(test)]
