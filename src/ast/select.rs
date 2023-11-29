@@ -1,0 +1,79 @@
+use super::separator_optional;
+use crate::WriteSql;
+
+/// SELECT
+///
+/// The select command retrieves rows from zero or more tables.
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// select(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "SELECT");
+/// # Ok(())
+/// # }
+/// ```
+pub fn select<Sql, Arg>(sql: &mut Sql)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("SELECT");
+}
+
+/// SELECT ALL
+///
+/// The select query will return all the candidate rows, including duplicates (database default).
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select_all};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// select_all(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "SELECT ALL");
+/// # Ok(())
+/// # }
+/// ```
+pub fn select_all<Sql, Arg>(sql: &mut Sql)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("SELECT ALL");
+}
+
+/// SELECT DISTINCT
+///
+/// The select query will return only the distinct cantidate rows, eliminating duplicates.
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select_distinct};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// select_distinct(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "SELECT DISTINCT");
+/// # Ok(())
+/// # }
+/// ```
+pub fn select_distinct<Sql, Arg>(sql: &mut Sql)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("SELECT DISTINCT");
+}
+
+// TODO: create select!() macro

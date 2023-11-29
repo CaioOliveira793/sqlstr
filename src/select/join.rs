@@ -2,6 +2,8 @@ use alloc::string::String;
 
 use crate::{error::SqlError, macros::map_intermediate_sql};
 
+// TODO: move to join ast
+
 pub struct Join<Arg> {
     pub(super) command: String,
     pub(super) arguments: Arg,

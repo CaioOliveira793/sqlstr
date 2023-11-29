@@ -53,6 +53,10 @@ impl<'c> ColumnExprList<'c> {
         Self(Vec::new())
     }
 
+    // TODO: return self for API chaining
+    // TODO: push a column that can turn into a Cow
+    // where
+    // C: Into<Cow<'c, str>>,
     pub fn column(&mut self, column: Cow<'c, str>) {
         self.0.push(column);
     }

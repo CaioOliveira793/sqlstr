@@ -5,8 +5,6 @@ use core::ops::Deref;
 use crate::error::SqlError;
 use crate::ArgumentBuffer;
 
-pub type Esql = SqlError<fmt::Error>;
-
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TestArgs(String, u32);
 

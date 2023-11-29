@@ -120,6 +120,9 @@ impl TableLockWait {
     }
 }
 
+/// LOCK sql command
+///
+/// - [Postgres table lock](https://www.postgresql.org/docs/current/sql-lock.html)
 pub fn table_lock<Sql, Arg>(
     sql: &mut Sql,
     tables: TableLock<'_>,

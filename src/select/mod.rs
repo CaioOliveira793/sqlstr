@@ -1,139 +1,78 @@
-use alloc::string::String;
-
-use crate::error::SqlError;
-use crate::macros::map_intermediate_sql;
-use crate::ArgumentBuffer;
-
-pub use columns::*;
-pub use from::*;
 pub use join::*;
-pub use macros::*;
-pub use values::*;
 
-mod columns;
-mod from;
 mod join;
-mod macros;
-mod values;
 
-pub fn select<Arg>(arguments: Arg) -> Select<Arg> {
-    Select::new(arguments)
+// TODO: support all the postgres dialect
+// https://www.postgresql.org/docs/9.0/functions.html
+
+#[macro_export]
+macro_rules! group_by {
+    ($first:literal$(,)? $($column:literal),* $(,)?) => {
+        concat!("GROUP BY ", $first, $(", ", $column),*)
+    };
+    (ALL $first:literal$(,)? $($column:literal),* $(,)?) => {
+        concat!("GROUP BY ALL ", $first, $(", ", $column),*)
+    };
+    (DISTINCT $first:literal$(,)? $($column:literal),* $(,)?) => {
+        concat!("GROUP BY DISTINCT ", $first, $(", ", $column),*)
+    };
 }
 
-pub fn select_all<Arg>(arguments: Arg) -> Select<Arg> {
-    Select::all(arguments)
+#[macro_export]
+macro_rules! grouping_element {
+    ($first:literal$(,)? $($column:literal),* $(,)?) => {
+        concat!($first, $(", ", $column),*)
+    };
+    (ROLLUP ($first:literal$(,)? $($column:literal),*)) => {
+        concat!("ROLLUP (", $first, $(", ", $column),*, ")")
+    };
+    (CUBE ($first:literal$(,)? $($column:literal),*)) => {
+        concat!("CUBE (", $first, $(", ", $column),*, ")")
+    };
+    (GROUPING SETS ($first:literal$(,)? $($column:literal),*)) => {
+        concat!("GROUPING SETS (", $first, $(", ", $column),*, ")")
+    };
 }
 
-pub fn select_distinct<Arg>(arguments: Arg) -> Select<Arg> {
-    Select::distinct(arguments)
+// TODO: support ORDER BY x DESC, y DESC NULL FIRST, z ASC, a USING > NULL LAST
+#[allow(unused_macros)]
+macro_rules! order_by {
+    ($col_expr:literal ASC) => {
+        concat!("ORDER BY ", $col_expr, " ASC")
+    };
+    ($col_expr:literal ASC NULLS FIRST) => {
+        concat!("ORDER BY ", $col_expr, " ASC NULLS FIRST")
+    };
+    ($col_expr:literal ASC NULLS LAST) => {
+        concat!("ORDER BY ", $col_expr, " ASC NULLS LAST")
+    };
+
+    ($col_expr:literal DESC) => {
+        concat!("ORDER BY ", $col_expr, " DESC")
+    };
+    ($col_expr:literal DESC NULLS FIRST) => {
+        concat!("ORDER BY ", $col_expr, " DESC NULLS FIRST")
+    };
+    ($col_expr:literal DESC NULLS LAST) => {
+        concat!("ORDER BY ", $col_expr, " DESC NULLS LAST")
+    };
+
+    ($col_expr:literal USING $op:tt) => {
+        concat!(
+            "ORDER BY ",
+            $col_expr,
+            " USING ",
+            $crate::select::comparison!($op)
+        )
+    };
 }
 
-pub struct Select<Arg> {
-    command: String,
-    arguments: Arg,
-}
-
-impl<Arg> Select<Arg> {
-    /// SELECT
-    ///
-    /// The select command retrieves rows from zero or more tables.
-    fn new(arguments: Arg) -> Self {
-        Self {
-            arguments,
-            command: String::from("SELECT"),
-        }
-    }
-
-    /// SELECT ALL
-    ///
-    /// The select query will return all the candidate rows, including duplicates.
-    ///
-    /// Generally the database default
-    fn all(arguments: Arg) -> Self {
-        Self {
-            arguments,
-            command: String::from("SELECT ALL"),
-        }
-    }
-
-    /// SELECT DISTINCT|DISTINCT ROW
-    ///
-    /// The select query will return only the distinct cantidate rows, eliminating duplicates.
-    fn distinct(arguments: Arg) -> Self {
-        Self {
-            arguments,
-            command: String::from("SELECT DISTINCT"),
-        }
-    }
-
-    /// Add a column into the SELECT command
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use squeal_builder::{select::*, Void, error::SqlError};
-    /// # use core::convert::Infallible;
-    /// # fn main() -> Result<(), SqlError<Infallible>> {
-    /// let cmd = select(Void::new())
-    ///     .column("first_name")?
-    ///     .column("last_name")?;
-    ///
-    /// assert_eq!(cmd.as_str(), "SELECT first_name, last_name");
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub fn column<EArg>(self, column: &str) -> Result<SelectColumn<Arg>, SqlError<EArg>> {
-        let sql = map_intermediate_sql!(SelectColumn, self);
-        sql.transition_column(column)
-    }
-
-    /// Add a column with a alias into the SELECT command
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use squeal_builder::{select::*, Void, error::SqlError};
-    /// # use core::convert::Infallible;
-    /// # fn main() -> Result<(), SqlError<Infallible>> {
-    /// let cmd = select(Void::new())
-    ///     .column_as("firstName", "first_name")?
-    ///     .column_as("lastName", "last_name")?;
-    ///
-    /// assert_eq!(cmd.as_str(), "SELECT firstName AS first_name, lastName AS last_name");
-    /// # Ok(())
-    /// # }
-    /// ```
-    pub fn column_as<EArg>(
-        self,
-        column: &str,
-        alias: &str,
-    ) -> Result<SelectColumn<Arg>, SqlError<EArg>> {
-        let sql = map_intermediate_sql!(SelectColumn, self);
-        sql.transition_column_as(column, alias)
-    }
-
-    pub fn value<T>(
-        self,
-        value: T,
-    ) -> Result<SelectValue<Arg>, SqlError<<Arg as ArgumentBuffer<T>>::Error>>
-    where
-        Arg: ArgumentBuffer<T>,
-    {
-        let sql = map_intermediate_sql!(SelectValue, self);
-        sql.transition_value(value)
-    }
-
-    pub fn values<T, I>(
-        self,
-        values: I,
-    ) -> Result<SelectValue<Arg>, SqlError<<Arg as ArgumentBuffer<T>>::Error>>
-    where
-        Arg: ArgumentBuffer<T>,
-        I: IntoIterator<Item = T>,
-    {
-        let sql = map_intermediate_sql!(SelectValue, self);
-        sql.transition_values(values)
-    }
+// TODO: https://www.postgresql.org/docs/current/sql-select.html#SQL-LIMIT
+#[allow(unused_macros)]
+macro_rules! limit {
+    (ALL) => {
+        "LIMIT ALL"
+    };
 }
 
 #[cfg(test)]
