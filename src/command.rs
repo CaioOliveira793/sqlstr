@@ -1,7 +1,7 @@
 use alloc::string::String;
 use core::convert::Infallible;
 
-use crate::{format_num::format_u32_base10, macros::display_sql_command};
+use crate::format_num::format_u32_base10;
 
 pub trait ArgumentBuffer<T> {
     type Error;
@@ -112,8 +112,6 @@ impl<Arg> WriteSql<Arg> for SqlCommand<Arg> {
         self.command.as_str()
     }
 }
-
-display_sql_command!(SqlCommand);
 
 /// Void argument buffer
 ///

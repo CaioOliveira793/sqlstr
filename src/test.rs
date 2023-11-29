@@ -76,10 +76,6 @@ pub enum User {
 impl User {
     pub const TABLE: &str = "user";
 
-    pub const fn table() -> &'static str {
-        Self::TABLE
-    }
-
     pub const fn as_str(&self) -> &'static str {
         match *self {
             Self::Id => "id",

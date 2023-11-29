@@ -1,5 +1,3 @@
-pub struct Columns(pub(crate) &'static str);
-
 pub struct Tables(pub(crate) &'static str);
 
 #[allow(unused_macros)]
@@ -98,36 +96,6 @@ macro_rules! condition {
                 $crate::select::condition!($ax $opx $bx)
             )+
         )
-    };
-}
-
-#[macro_export]
-macro_rules! static_columns {
-    ($column:literal) => {
-        $column
-    };
-
-    ($column:literal AS $alias:literal) => {
-        concat!($column, " AS ", $alias)
-    };
-
-    ($fcolumn:literal $(AS $falias:literal)?, $($column:literal $(AS $alias:literal)?),* $(,)?) => {
-        concat!($fcolumn $(, " AS ", $falias)?, $(", ", $column $(, " AS ", $alias)?),*)
-    };
-}
-
-#[macro_export]
-macro_rules! columns {
-    ($column:literal) => {
-        $crate::select::Columns($column)
-    };
-
-    ($column:literal AS $alias:literal) => {
-        $crate::select::Columns($crate::select::static_columns!($column, AS, $alias))
-    };
-
-    ($fcolumn:literal $(AS $falias:literal)?, $($column:literal $(AS $alias:literal)?),* $(,)?) => {
-        $crate::select::Columns($crate::select::static_columns!($fcolumn $(AS $falias)?, $($column $(AS $alias)?),*))
     };
 }
 
@@ -312,10 +280,8 @@ macro_rules! limit {
 
 // TODO: create select!() macro to build a sql command in compile-time
 
-pub use static_columns;
 pub use static_tables;
 
-pub use columns;
 pub use comparison;
 pub use condition;
 pub use join;
@@ -334,38 +300,6 @@ mod test {
         assert_eq!(
             comma_separated!("id", "name", "age", "email"),
             "id, name, age, email"
-        );
-    }
-
-    #[test]
-    fn static_columns_test() {
-        assert_eq!(static_columns!("id"), "id");
-        assert_eq!(static_columns!("'quoted column'",), "'quoted column'");
-        assert_eq!(static_columns!("id", "created"), "id, created");
-        assert_eq!(
-            static_columns!("id", "name", "deleted",),
-            "id, name, deleted"
-        );
-        assert_eq!(static_columns!("userName" AS "name",), "userName AS name");
-        assert_eq!(
-            static_columns!("userName" AS "name", "id",),
-            "userName AS name, id"
-        );
-        assert_eq!(
-            static_columns!("userName" AS "name", "ID" AS "id"),
-            "userName AS name, ID AS id"
-        );
-        assert_eq!(
-            static_columns!("userName" AS "name", "age", "ID" AS "id"),
-            "userName AS name, age, ID AS id"
-        );
-        assert_eq!(
-            static_columns!("name", "age", "ID" AS "id"),
-            "name, age, ID AS id"
-        );
-        assert_eq!(
-            static_columns!("n" AS "name", "a" AS "age", "ID" AS "id"),
-            "n AS name, a AS age, ID AS id"
         );
     }
 

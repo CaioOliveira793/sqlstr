@@ -1,11 +1,7 @@
 use alloc::string::String;
 
 use super::Tables;
-use crate::{
-    error::SqlError,
-    macros::{display_sql_command, map_intermediate_sql},
-    SqlCommand,
-};
+use crate::{error::SqlError, macros::map_intermediate_sql, SqlCommand};
 
 /// Starts a `FROM` section to push table names
 pub struct FromTable<Arg> {
@@ -48,5 +44,3 @@ impl<Arg> FromTable<Arg> {
         map_intermediate_sql!(SqlCommand, self)
     }
 }
-
-display_sql_command!(FromTable);

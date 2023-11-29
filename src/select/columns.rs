@@ -1,6 +1,6 @@
 use alloc::string::String;
 
-use super::{Columns, FromTable, Tables};
+use super::{FromTable, Tables};
 use crate::{error::SqlError, macros::map_intermediate_sql};
 
 pub struct SelectColumn<Arg> {
@@ -68,21 +68,6 @@ impl<Arg> SelectColumn<Arg> {
         self.command.push_str(column);
         self.command.push_str(" AS ");
         self.command.push_str(alias);
-        Ok(self)
-    }
-
-    pub fn static_columns<EArg>(mut self, columns: Columns) -> Result<Self, SqlError<EArg>> {
-        self.command.push(',');
-        self.transition_static_columns(columns)
-    }
-
-    pub(super) fn transition_static_columns<EArg>(
-        mut self,
-        columns: Columns,
-    ) -> Result<Self, SqlError<EArg>> {
-        self.command.try_reserve(columns.0.len() + 1)?;
-        self.command.push(' ');
-        self.command.push_str(columns.0);
         Ok(self)
     }
 

@@ -25,23 +25,6 @@ fn select_column() {
 }
 
 #[test]
-fn select_static_columns() {
-    fn cmd() -> Result<SqlCommand<TestArgs>, Esql> {
-        let args = TestArgs::default();
-        let sql = select(args)
-            .static_columns(columns!("id", "created", "name"))?
-            .from(User::table())?
-            .end();
-        Ok(sql)
-    }
-
-    let sql = cmd().unwrap();
-
-    assert_eq!(sql.command, "SELECT id, created, name FROM user");
-    assert_eq!(sql.arguments.as_str(), "");
-}
-
-#[test]
 fn select_values_iter() {
     fn cmd() -> Result<SqlCommand<TestArgs>, Esql> {
         let args = TestArgs::default();

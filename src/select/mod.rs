@@ -1,7 +1,7 @@
 use alloc::string::String;
 
 use crate::error::SqlError;
-use crate::macros::{display_sql_command, map_intermediate_sql};
+use crate::macros::map_intermediate_sql;
 use crate::ArgumentBuffer;
 
 pub use columns::*;
@@ -112,14 +112,6 @@ impl<Arg> Select<Arg> {
         sql.transition_column_as(column, alias)
     }
 
-    pub fn static_columns<EArg>(
-        self,
-        columns: Columns,
-    ) -> Result<SelectColumn<Arg>, SqlError<EArg>> {
-        let sql = map_intermediate_sql!(SelectColumn, self);
-        sql.transition_static_columns(columns)
-    }
-
     pub fn value<T>(
         self,
         value: T,
@@ -143,8 +135,6 @@ impl<Arg> Select<Arg> {
         sql.transition_values(values)
     }
 }
-
-display_sql_command!(Select);
 
 #[cfg(test)]
 mod test;

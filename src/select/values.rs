@@ -1,10 +1,8 @@
 use alloc::string::String;
 
 use crate::{
-    error::SqlError,
-    format_num::format_u32_base10,
-    macros::{display_sql_command, map_intermediate_sql},
-    ArgumentBuffer, SqlCommand,
+    error::SqlError, format_num::format_u32_base10, macros::map_intermediate_sql, ArgumentBuffer,
+    SqlCommand,
 };
 
 pub struct SelectValue<Arg> {
@@ -82,5 +80,3 @@ impl<Arg> SelectValue<Arg> {
         map_intermediate_sql!(SqlCommand, self)
     }
 }
-
-display_sql_command!(SelectValue);

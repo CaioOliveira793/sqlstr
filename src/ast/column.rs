@@ -11,8 +11,7 @@ impl<'c> ColumnExpr<'c> {
     }
 
     pub fn from_list(list: ColumnExprList<'c>) -> Self {
-        let list = list.0.join(", ");
-        Self(Cow::Owned(list))
+        Self(Cow::Owned(list.0.join(", ")))
     }
 
     pub fn as_str(&self) -> &str {
@@ -102,9 +101,58 @@ impl<'c> Deref for ColumnExprList<'c> {
     }
 }
 
+#[macro_export]
+macro_rules! static_columns {
+    ($column:literal) => {
+        $column
+    };
+
+    ($column:literal AS $alias:literal) => {
+        concat!($column, " AS ", $alias)
+    };
+
+    ($fcolumn:literal $(AS $falias:literal)?, $($column:literal $(AS $alias:literal)?),* $(,)?) => {
+        concat!($fcolumn $(, " AS ", $falias)?, $(", ", $column $(, " AS ", $alias)?),*)
+    };
+}
+
+pub use static_columns;
+
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn static_columns_test() {
+        assert_eq!(static_columns!("id"), "id");
+        assert_eq!(static_columns!("'quoted column'",), "'quoted column'");
+        assert_eq!(static_columns!("id", "created"), "id, created");
+        assert_eq!(
+            static_columns!("id", "name", "deleted",),
+            "id, name, deleted"
+        );
+        assert_eq!(static_columns!("userName" AS "name",), "userName AS name");
+        assert_eq!(
+            static_columns!("userName" AS "name", "id",),
+            "userName AS name, id"
+        );
+        assert_eq!(
+            static_columns!("userName" AS "name", "ID" AS "id"),
+            "userName AS name, ID AS id"
+        );
+        assert_eq!(
+            static_columns!("userName" AS "name", "age", "ID" AS "id"),
+            "userName AS name, age, ID AS id"
+        );
+        assert_eq!(
+            static_columns!("name", "age", "ID" AS "id"),
+            "name, age, ID AS id"
+        );
+        assert_eq!(
+            static_columns!("n" AS "name", "a" AS "age", "ID" AS "id"),
+            "n AS name, a AS age, ID AS id"
+        );
+    }
 
     #[test]
     fn columns_list() {
