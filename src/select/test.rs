@@ -1,25 +1,5 @@
-use crate::test::{display_iter, TestArgs, User};
+use crate::test::{display_iter, TestArgs};
 use crate::*;
-
-#[test]
-fn ast_select_column() {
-    let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
-
-    ast::select(&mut sql);
-    let mut columns = ast::column_list();
-    columns.column(User::Id.as_str().into());
-    columns.column_as("created_at".into(), User::Created.as_str().into());
-    columns.column(User::Name.as_str().into());
-    ast::separator_optional(&mut sql);
-    sql.push_cmd(columns.end().as_str());
-    ast::from_tables(&mut sql, [User::TABLE]);
-
-    assert_eq!(
-        sql.as_command(),
-        "SELECT id, created_at AS created, name FROM user"
-    );
-    assert_eq!(sql.arguments.as_str(), "");
-}
 
 #[test]
 fn ast_select_values_iter() {

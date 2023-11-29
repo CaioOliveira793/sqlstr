@@ -10,7 +10,7 @@ impl<'c> ColumnExpr<'c> {
         Self(column_expr)
     }
 
-    pub fn from_list(list: ColumnExprList<'c>) -> Self {
+    pub fn from_list(list: &ColumnExprList<'c>) -> Self {
         Self(Cow::Owned(list.0.join(", ")))
     }
 
@@ -53,20 +53,21 @@ impl<'c> ColumnExprList<'c> {
         Self(Vec::new())
     }
 
-    // TODO: return self for API chaining
-    // TODO: push a column that can turn into a Cow
-    // where
-    // C: Into<Cow<'c, str>>,
-    pub fn column(&mut self, column: Cow<'c, str>) {
-        self.0.push(column);
+    pub fn column<C>(mut self, column: C) -> Self
+    where
+        C: Into<Cow<'c, str>>,
+    {
+        self.0.push(column.into());
+        self
     }
 
-    pub fn column_as(&mut self, column: Cow<'c, str>, alias: Cow<'c, str>) {
+    pub fn column_as(mut self, column: &str, alias: &str) -> Self {
         let mut col = String::with_capacity(column.len() + alias.len() + 4);
-        col.push_str(&column);
+        col.push_str(column);
         col.push_str(" AS ");
-        col.push_str(&alias);
+        col.push_str(alias);
         self.0.push(Cow::Owned(col));
+        self
     }
 
     pub fn as_slice(&self) -> &[Cow<'c, str>] {
@@ -80,13 +81,13 @@ impl<'c> ColumnExprList<'c> {
         self.0.extend_from_slice(other);
     }
 
-    pub fn end(self) -> ColumnExpr<'c> {
+    pub fn expr(&self) -> ColumnExpr<'c> {
         ColumnExpr::from_list(self)
     }
 }
 
-impl<'c> From<ColumnExprList<'c>> for ColumnExpr<'c> {
-    fn from(value: ColumnExprList<'c>) -> Self {
+impl<'c> From<&ColumnExprList<'c>> for ColumnExpr<'c> {
+    fn from(value: &ColumnExprList<'c>) -> Self {
         Self::from_list(value)
     }
 }
@@ -125,6 +126,11 @@ pub use static_columns;
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::{
+        ast::{from_tables, select, separator_optional},
+        test::{TestArgs, User},
+        SqlCommand,
+    };
 
     #[test]
     fn static_columns_test() {
@@ -160,21 +166,21 @@ mod test {
 
     #[test]
     fn columns_list() {
-        let mut columns = column_list();
-        columns.column("id".into());
-        columns.column_as("firstName".into(), "first_name".into());
-        columns.column("last_name".into());
-        let columns = columns.end();
+        let columns = column_list()
+            .column("id")
+            .column_as("firstName", "first_name")
+            .column("last_name")
+            .expr();
 
         assert_eq!(columns.as_str(), "id, firstName AS first_name, last_name");
     }
 
     #[test]
     fn columns_list_aliased() {
-        let mut columns = column_list();
-        columns.column_as("identifier".into(), "id".into());
-        columns.column_as("u.fullName".into(), "full_name".into());
-        let columns = columns.end();
+        let columns = column_list()
+            .column_as("identifier", "id")
+            .column_as("u.fullName", "full_name")
+            .expr();
 
         assert_eq!(
             columns.as_str(),
@@ -184,20 +190,41 @@ mod test {
 
     #[test]
     fn columns_extended() {
-        let mut columns = column_list();
-        columns.column_as("identifier".into(), "id".into());
-        columns.column_as("u.fullName".into(), "full_name".into());
+        let mut columns = column_list()
+            .column_as("identifier", "id")
+            .column_as("u.fullName", "full_name");
 
-        let mut cols = column_list();
-        cols.column("pass".into());
-        cols.column_as("org".into(), "organization".into());
+        let cols = column_list()
+            .column("pass")
+            .column_as("org", "organization");
 
         columns.extend(cols.as_slice());
-        let columns = columns.end();
+        let columns = columns.expr();
 
         assert_eq!(
             columns.as_str(),
             "identifier AS id, u.fullName AS full_name, pass, org AS organization"
         );
+    }
+
+    #[test]
+    fn select_columns_from_table() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+
+        select(&mut sql);
+        let columns = column_list()
+            .column(User::Id.as_str())
+            .column_as("created_at", User::Created.as_str())
+            .column(User::Name.as_str())
+            .expr();
+        separator_optional(&mut sql);
+        sql.push_cmd(columns.as_str());
+        from_tables(&mut sql, [User::TABLE]);
+
+        assert_eq!(
+            sql.as_command(),
+            "SELECT id, created_at AS created, name FROM user"
+        );
+        assert_eq!(sql.arguments.as_str(), "");
     }
 }

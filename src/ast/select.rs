@@ -76,4 +76,29 @@ where
     sql.push_cmd("SELECT DISTINCT");
 }
 
-// TODO: create select!() macro
+#[macro_export]
+macro_rules! static_select {
+    (SELECT) => {
+        "SELECT"
+    };
+    (SELECT ALL) => {
+        "SELECT ALL"
+    };
+    (SELECT DISTINCT) => {
+        "SELECT DISTINCT"
+    };
+}
+
+pub use static_select;
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn static_select_macro() {
+        assert_eq!(static_select!(SELECT), "SELECT");
+
+        assert_eq!(static_select!(SELECT ALL), "SELECT ALL");
+
+        assert_eq!(static_select!(SELECT DISTINCT), "SELECT DISTINCT");
+    }
+}

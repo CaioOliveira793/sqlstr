@@ -28,7 +28,7 @@ macro_rules! static_join {
         concat!(
             "INNER JOIN ",
             $table,
-            " ON ",
+            " ON NOT ",
             $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
@@ -53,7 +53,7 @@ macro_rules! static_join {
         concat!(
             "LEFT JOIN ",
             $table,
-            " ON ",
+            " ON NOT ",
             $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
@@ -78,7 +78,7 @@ macro_rules! static_join {
         concat!(
             "RIGHT JOIN ",
             $table,
-            " ON ",
+            " ON NOT ",
             $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
@@ -179,7 +179,7 @@ mod test {
         );
         assert_eq!(
             static_join!(RIGHT "user" ON NOT "user.id" = "access_history.user_id" AND "user.updated" < "access_history.created"),
-            "RIGHT JOIN user ON user.id = access_history.user_id AND user.updated < access_history.created"
+            "RIGHT JOIN user ON NOT user.id = access_history.user_id AND user.updated < access_history.created"
         );
         assert_eq!(
             static_join!(RIGHT "user" ON "user.id" = "access_history.user_id" AND_NOT "user.updated" >= "access_history.created"),
@@ -200,7 +200,7 @@ mod test {
         );
         assert_eq!(
             static_join!(FULL "user" ON NOT "user.id" != "access_history.user_id" OR_NOT "user.updated" < "access_history.created"),
-            "FULL JOIN user ON user.id = access_history.user_id OR NOT user.updated < access_history.created"
+            "FULL JOIN user ON NOT user.id <> access_history.user_id OR NOT user.updated < access_history.created"
         );
     }
 }
