@@ -1,6 +1,141 @@
+use crate::WriteSql;
+
+pub enum JoinType {
+    Cross,
+    Inner,
+    Left,
+    Right,
+    Full,
+}
+
+impl JoinType {
+    pub const fn as_str(&self) -> &'static str {
+        match *self {
+            Self::Cross => "CROSS",
+            Self::Inner => "INNER",
+            Self::Left => "LEFT",
+            Self::Right => "RIGHT",
+            Self::Full => "FULL",
+        }
+    }
+}
+
+/// Writes a `CROSS JOIN <table>` clause
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::ast::{cross_join};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// cross_join(&mut sql, "post");
+///
+/// assert_eq!(sql.as_command(), "CROSS JOIN post");
+/// # Ok(())
+/// # }
+/// ```
+pub fn cross_join<Sql, Arg>(sql: &mut Sql, table: &str)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("CROSS JOIN ");
+    sql.push_cmd(table);
+}
+
+/// Starts a `JOIN` clause.
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::ast::{join, JoinType};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// join(&mut sql, JoinType::Left, "user");
+///
+/// assert_eq!(sql.as_command(), "LEFT JOIN user");
+/// # Ok(())
+/// # }
+/// ```
+pub fn join<Sql, Arg>(sql: &mut Sql, typ: JoinType, table: &str)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd(typ.as_str());
+    sql.push_cmd(" JOIN ");
+    sql.push_cmd(table);
+}
+
+/// Starts a join condition.
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::ast::{join_on, join, JoinType};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// join(&mut sql, JoinType::Inner, "customer");
+/// join_on(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "INNER JOIN customer ON");
+/// # Ok(())
+/// # }
+/// ```
+pub fn join_on<Sql, Arg>(sql: &mut Sql)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("ON");
+}
+
+/// Writes a join condition with the `USING` form.
+///
+/// # Example
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::ast::{join_using, join, JoinType};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// join(&mut sql, JoinType::Right, "customer");
+/// join_using(&mut sql, ["attendant_id"]);
+///
+/// assert_eq!(sql.as_command(), "RIGHT JOIN customer USING (attendant_id)");
+/// # Ok(())
+/// # }
+/// ```
+pub fn join_using<'t, Sql, Arg, I>(sql: &mut Sql, tables: I)
+where
+    Sql: WriteSql<Arg>,
+    I: IntoIterator<Item = &'t str>,
+{
+    separator_optional(sql);
+    sql.push_cmd("USING (");
+
+    let mut tbls = tables.into_iter();
+    if let Some(tbl) = tbls.next() {
+        sql.push_cmd(tbl);
+    }
+
+    for tbl in tbls {
+        sql.push_cmd(", ");
+        sql.push_cmd(tbl);
+    }
+    sql.push_cmd(")");
+}
+
 /// Comma separated list of shared column names
 #[macro_export]
-macro_rules! static_using {
+macro_rules! static_join_using {
     ($first:literal) => {
         concat!("USING (", $first, ")")
     };
@@ -37,7 +172,7 @@ macro_rules! static_join {
             "INNER JOIN ",
             $table,
             " ",
-            $crate::ast::static_using!($first, $($column),*),
+            $crate::ast::static_join_using!($first, $($column),*),
         )
     };
 
@@ -62,7 +197,7 @@ macro_rules! static_join {
             "LEFT JOIN ",
             $table,
             " ",
-            $crate::ast::static_using!($first, $($column),*),
+            $crate::ast::static_join_using!($first, $($column),*),
         )
     };
 
@@ -87,7 +222,7 @@ macro_rules! static_join {
             "RIGHT JOIN ",
             $table,
             " ",
-            $crate::ast::static_using!($first, $($column),*),
+            $crate::ast::static_join_using!($first, $($column),*),
         )
     };
 
@@ -112,25 +247,47 @@ macro_rules! static_join {
             "FULL JOIN ",
             $table,
             " ",
-            $crate::ast::static_using!($first, $($column),*)
+            $crate::ast::static_join_using!($first, $($column),*)
         )
     };
 }
 
 pub use static_join;
-pub use static_using;
+pub use static_join_using;
+
+use super::separator_optional;
 
 #[cfg(test)]
 mod test {
+    use crate::{ast::join_using, test::TestArgs, SqlCommand};
+
+    #[test]
+    fn join_using_single_column() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+        join_using(&mut sql, ["id"]);
+        assert_eq!(sql.as_command(), "USING (id)");
+    }
+
+    #[test]
+    fn join_using_multiple_columns() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+        join_using(&mut sql, ["id", "customer_id"]);
+        assert_eq!(sql.as_command(), "USING (id, customer_id)");
+
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+        join_using(&mut sql, ["id", "sale_id", "customer_id"]);
+        assert_eq!(sql.as_command(), "USING (id, sale_id, customer_id)");
+    }
+
     #[test]
     fn static_using_macro() {
-        assert_eq!(static_using!("id"), "USING (id)");
+        assert_eq!(static_join_using!("id"), "USING (id)");
         assert_eq!(
-            static_using!("id", "customer_id"),
+            static_join_using!("id", "customer_id"),
             "USING (id, customer_id)"
         );
         assert_eq!(
-            static_using!("id", "sale_id", "customer_id",),
+            static_join_using!("id", "sale_id", "customer_id",),
             "USING (id, sale_id, customer_id)"
         );
     }
