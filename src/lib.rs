@@ -7,7 +7,6 @@ mod format_num;
 
 pub mod ast;
 pub mod error;
-pub mod select;
 
 pub use command::*;
 
