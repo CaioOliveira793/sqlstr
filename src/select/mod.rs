@@ -66,11 +66,3 @@ macro_rules! order_by {
         )
     };
 }
-
-// TODO: https://www.postgresql.org/docs/current/sql-select.html#SQL-LIMIT
-#[allow(unused_macros)]
-macro_rules! limit {
-    (ALL) => {
-        "LIMIT ALL"
-    };
-}
