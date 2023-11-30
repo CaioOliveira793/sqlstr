@@ -14,7 +14,7 @@ where
     }
 
     pub fn close(self) {
-        drop(self)
+        core::mem::drop(self)
     }
 
     pub fn sql(&mut self) -> &mut Sql {

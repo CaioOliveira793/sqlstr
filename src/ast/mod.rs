@@ -7,6 +7,7 @@ mod locking;
 mod select;
 mod separator;
 mod table;
+mod value;
 
 pub use cast::*;
 pub use column::*;
@@ -17,3 +18,4 @@ pub use locking::*;
 pub use select::*;
 pub use separator::*;
 pub use table::*;
+pub use value::*;

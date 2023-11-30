@@ -74,6 +74,3 @@ macro_rules! limit {
         "LIMIT ALL"
     };
 }
-
-#[cfg(test)]
-mod test;

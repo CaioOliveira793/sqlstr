@@ -57,6 +57,27 @@ use crate::command::WriteSql;
 /// # Ok(())
 /// # }
 /// ```
+///
+/// Only if a argument value is present, a separator is placed.
+///
+/// ```
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// sql.push_cmd("SELECT ");
+/// item_separator_optional(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "SELECT ");
+///
+/// sql.push_value(-1);
+/// item_separator_optional(&mut sql);
+/// sql.push_value("Rust");
+///
+/// assert_eq!(sql.as_command(), "SELECT $1, $2");
+/// # Ok(())
+/// # }
+/// ```
 pub fn item_separator_optional<Sql, Arg>(sql: &mut Sql)
 where
     Sql: WriteSql<Arg>,
@@ -71,10 +92,16 @@ where
         return;
     }
 
-    // "SELECT $1,   "
-    match sql.as_command().chars().rev().find(|ch| *ch != ' ') {
-        Some(',') | None => {}
-        Some(_) => sql.push_cmd(", "),
+    // "SELECT $1   "
+    for ch in sql.as_command().chars().rev().skip_while(|ch| *ch == ' ') {
+        match ch {
+            '0'..='9' => continue,
+            '$' => {
+                sql.push_cmd(", ");
+                return;
+            }
+            _ => return,
+        }
     }
 }
 

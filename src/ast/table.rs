@@ -16,6 +16,21 @@ macro_rules! static_tables {
     };
 }
 
+#[macro_export]
+macro_rules! static_from_tables {
+    (FROM $table:literal) => {
+        concat!("FROM ", $table)
+    };
+
+    (FROM $table:literal AS $alias:literal) => {
+        concat!("FROM ", $table, " AS ", $alias)
+    };
+
+    (FROM $ftable:literal $(AS $falias:literal)?, $($table:literal $(AS $alias:literal)?),* $(,)?) => {
+        concat!("FROM ", $ftable $(, " AS ", $falias)?, $(", ", $table $(, " AS ", $alias)?),*)
+    };
+}
+
 pub fn from_tables<'t, Sql, Arg, I>(sql: &mut Sql, tables: I)
 where
     Sql: WriteSql<Arg>,
@@ -38,7 +53,11 @@ where
 #[cfg(test)]
 mod test {
     use super::from_tables;
-    use crate::{test::TestArgs, SqlCommand};
+    use crate::{
+        ast::{select, separator},
+        test::TestArgs,
+        SqlCommand,
+    };
 
     #[test]
     fn from_tables_no_tables() {
@@ -85,5 +104,45 @@ mod test {
             static_tables!("user", "customer" AS "c", "organization", "product" AS "p",),
             "user, customer AS c, organization, product AS p"
         );
+    }
+
+    #[test]
+    fn static_from_tables_test() {
+        assert_eq!(static_from_tables!(FROM "user"), "FROM user");
+        assert_eq!(static_from_tables!(FROM "user" AS "u"), "FROM user AS u");
+        assert_eq!(
+            static_from_tables!(FROM "'quoted table'",),
+            "FROM 'quoted table'"
+        );
+        assert_eq!(
+            static_from_tables!(FROM "'quoted table'" AS "'other'",),
+            "FROM 'quoted table' AS 'other'"
+        );
+        assert_eq!(
+            static_from_tables!(FROM "user", "customer"),
+            "FROM user, customer"
+        );
+        assert_eq!(
+            static_from_tables!(FROM "user", "customer", "organization",),
+            "FROM user, customer, organization"
+        );
+        assert_eq!(
+            static_from_tables!(FROM "user", "customer" AS "c", "organization", "product" AS "p",),
+            "FROM user, customer AS c, organization, product AS p"
+        );
+    }
+
+    #[test]
+    fn select_static_from_tables() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+
+        select(&mut sql);
+        separator(&mut sql);
+        sql.push_cmd("name");
+        separator(&mut sql);
+        sql.push_cmd(static_from_tables!(FROM "user", "product"));
+
+        assert_eq!(sql.command, "SELECT name FROM user, product");
+        assert_eq!(sql.arguments.as_str(), "");
     }
 }
