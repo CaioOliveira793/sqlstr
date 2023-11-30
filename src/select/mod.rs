@@ -29,36 +29,3 @@ macro_rules! grouping_element {
         concat!("GROUPING SETS (", $first, $(", ", $column),*, ")")
     };
 }
-
-// TODO: support ORDER BY x DESC, y DESC NULL FIRST, z ASC, a USING > NULL LAST
-#[allow(unused_macros)]
-macro_rules! order_by {
-    ($col_expr:literal ASC) => {
-        concat!("ORDER BY ", $col_expr, " ASC")
-    };
-    ($col_expr:literal ASC NULLS FIRST) => {
-        concat!("ORDER BY ", $col_expr, " ASC NULLS FIRST")
-    };
-    ($col_expr:literal ASC NULLS LAST) => {
-        concat!("ORDER BY ", $col_expr, " ASC NULLS LAST")
-    };
-
-    ($col_expr:literal DESC) => {
-        concat!("ORDER BY ", $col_expr, " DESC")
-    };
-    ($col_expr:literal DESC NULLS FIRST) => {
-        concat!("ORDER BY ", $col_expr, " DESC NULLS FIRST")
-    };
-    ($col_expr:literal DESC NULLS LAST) => {
-        concat!("ORDER BY ", $col_expr, " DESC NULLS LAST")
-    };
-
-    ($col_expr:literal USING $op:tt) => {
-        concat!(
-            "ORDER BY ",
-            $col_expr,
-            " USING ",
-            $crate::select::comparison!($op)
-        )
-    };
-}
