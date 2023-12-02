@@ -127,7 +127,7 @@ pub use static_columns;
 mod test {
     use super::*;
     use crate::{
-        ast::{from_tables, select, separator_optional},
+        expr::{from_tables, select, separator_optional},
         test::{TestArgs, User},
         SqlCommand,
     };

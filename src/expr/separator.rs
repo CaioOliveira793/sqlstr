@@ -1,4 +1,4 @@
-use crate::command::WriteSql;
+use crate::WriteSql;
 
 /// Puts an item separator `", "` into the command buffer if the sql command does
 /// not ends with one.
@@ -8,7 +8,7 @@ use crate::command::WriteSql;
 /// The separator is only added if not preceded at the end of the sql command.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -26,7 +26,7 @@ use crate::command::WriteSql;
 /// In case the item separator (`','`) is present, only a space (`' '`) is added.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -44,7 +44,7 @@ use crate::command::WriteSql;
 /// When the sql buffer does not end with an item separator, one is added.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -61,7 +61,7 @@ use crate::command::WriteSql;
 /// Only if a argument value is present, a separator is placed.
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator_optional};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::item_separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -110,7 +110,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::item_separator};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::item_separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -135,7 +135,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::separator_optional};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::separator_optional};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -171,7 +171,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::separator};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

@@ -26,7 +26,7 @@ impl JoinType {
 ///
 /// ```
 /// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::ast::{cross_join};
+/// # use squeal_builder::expr::{cross_join};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -51,7 +51,7 @@ where
 ///
 /// ```
 /// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::ast::{join, JoinType};
+/// # use squeal_builder::expr::{join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -77,7 +77,7 @@ where
 ///
 /// ```
 /// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::ast::{join_on, join, JoinType};
+/// # use squeal_builder::expr::{join_on, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -102,7 +102,7 @@ where
 ///
 /// ```
 /// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::ast::{join_using, join, JoinType};
+/// # use squeal_builder::expr::{join_using, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -156,7 +156,7 @@ macro_rules! static_join {
             "INNER JOIN ",
             $table,
             " ON ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (INNER $table:literal ON NOT $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)*) => {
@@ -164,7 +164,7 @@ macro_rules! static_join {
             "INNER JOIN ",
             $table,
             " ON NOT ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (INNER $table:literal USING ($first:literal$(,)? $($column:literal),*)) => {
@@ -172,7 +172,7 @@ macro_rules! static_join {
             "INNER JOIN ",
             $table,
             " ",
-            $crate::ast::static_join_using!($first, $($column),*),
+            $crate::expr::static_join_using!($first, $($column),*),
         )
     };
 
@@ -181,7 +181,7 @@ macro_rules! static_join {
             "LEFT JOIN ",
             $table,
             " ON ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (LEFT $table:literal ON NOT $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)*) => {
@@ -189,7 +189,7 @@ macro_rules! static_join {
             "LEFT JOIN ",
             $table,
             " ON NOT ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (LEFT $table:literal USING ($first:literal$(,)? $($column:literal),*)) => {
@@ -197,7 +197,7 @@ macro_rules! static_join {
             "LEFT JOIN ",
             $table,
             " ",
-            $crate::ast::static_join_using!($first, $($column),*),
+            $crate::expr::static_join_using!($first, $($column),*),
         )
     };
 
@@ -206,7 +206,7 @@ macro_rules! static_join {
             "RIGHT JOIN ",
             $table,
             " ON ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (RIGHT $table:literal ON NOT $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)*) => {
@@ -214,7 +214,7 @@ macro_rules! static_join {
             "RIGHT JOIN ",
             $table,
             " ON NOT ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (RIGHT $table:literal USING ($first:literal$(,)? $($column:literal),*)) => {
@@ -222,7 +222,7 @@ macro_rules! static_join {
             "RIGHT JOIN ",
             $table,
             " ",
-            $crate::ast::static_join_using!($first, $($column),*),
+            $crate::expr::static_join_using!($first, $($column),*),
         )
     };
 
@@ -231,7 +231,7 @@ macro_rules! static_join {
             "FULL JOIN ",
             $table,
             " ON ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (FULL $table:literal ON NOT $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)*) => {
@@ -239,7 +239,7 @@ macro_rules! static_join {
             "FULL JOIN ",
             $table,
             " ON NOT ",
-            $crate::ast::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
+            $crate::expr::static_condition!($a $op $b $($logic_op $ax $opx $bx)*)
         )
     };
     (FULL $table:literal USING ($first:literal$(,)? $($column:literal),*)) => {
@@ -247,7 +247,7 @@ macro_rules! static_join {
             "FULL JOIN ",
             $table,
             " ",
-            $crate::ast::static_join_using!($first, $($column),*)
+            $crate::expr::static_join_using!($first, $($column),*)
         )
     };
 }
@@ -259,7 +259,7 @@ use super::separator_optional;
 
 #[cfg(test)]
 mod test {
-    use crate::{ast::join_using, test::TestArgs, SqlCommand};
+    use crate::{expr::join_using, test::TestArgs, SqlCommand};
 
     #[test]
     fn join_using_single_column() {

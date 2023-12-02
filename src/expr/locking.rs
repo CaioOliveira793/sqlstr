@@ -185,19 +185,19 @@ pub(super) use lock_strength;
 #[macro_export]
 macro_rules! static_row_lock {
     (FOR $s1:tt) => {
-        concat!("FOR ", $crate::ast::lock_strength!($s1))
+        concat!("FOR ", $crate::expr::lock_strength!($s1))
     };
     (FOR $s1:tt NOWAIT) => {
-        concat!("FOR ", $crate::ast::lock_strength!($s1), " NOWAIT")
+        concat!("FOR ", $crate::expr::lock_strength!($s1), " NOWAIT")
     };
     (FOR $s1:tt SKIP LOCKED) => {
-        concat!("FOR ", $crate::ast::lock_strength!($s1), " SKIP LOCKED")
+        concat!("FOR ", $crate::expr::lock_strength!($s1), " SKIP LOCKED")
     };
 
     (FOR $s1:tt OF $ftbl:literal$(,)? $($tbl:literal),*) => {
         concat!(
             "FOR ",
-            $crate::ast::lock_strength!($s1),
+            $crate::expr::lock_strength!($s1),
             " OF ",
             $ftbl,
             $(", ", $tbl),*
@@ -206,7 +206,7 @@ macro_rules! static_row_lock {
     (FOR $s1:tt OF $ftbl:literal$(,)? $($tbl:literal),* NOWAIT) => {
         concat!(
             "FOR ",
-            $crate::ast::lock_strength!($s1),
+            $crate::expr::lock_strength!($s1),
             " OF ",
             $ftbl,
             $(", ", $tbl,)*
@@ -216,7 +216,7 @@ macro_rules! static_row_lock {
     (FOR $s1:tt OF $ftbl:literal$(,)? $($tbl:literal),* SKIP LOCKED) => {
         concat!(
             "FOR ",
-            $crate::ast::lock_strength!($s1),
+            $crate::expr::lock_strength!($s1),
             " OF ",
             $ftbl,
             $(", ", $tbl,)*
@@ -277,16 +277,16 @@ macro_rules! static_table_lock {
     };
 
     (LOCK TABLE $table:literal$(,)? $($tables:literal),* IN $mode:tt MODE) => {
-        concat!("LOCK TABLE ", $table, $(", ", $tables,)* " IN ", $crate::ast::lockmode!($mode), " MODE")
+        concat!("LOCK TABLE ", $table, $(", ", $tables,)* " IN ", $crate::expr::lockmode!($mode), " MODE")
     };
 	(LOCK TABLE ONLY $table:literal IN $mode:tt MODE) => {
-        concat!("LOCK TABLE ONLY ", $table, " IN ", $crate::ast::lockmode!($mode), " MODE")
+        concat!("LOCK TABLE ONLY ", $table, " IN ", $crate::expr::lockmode!($mode), " MODE")
     };
     (LOCK TABLE $table:literal$(,)? $($tables:literal),* IN $mode:tt MODE NOWAIT) => {
-        concat!("LOCK TABLE ", $table, $(", ", $tables,)* " IN ", $crate::ast::lockmode!($mode), " MODE NOWAIT")
+        concat!("LOCK TABLE ", $table, $(", ", $tables,)* " IN ", $crate::expr::lockmode!($mode), " MODE NOWAIT")
     };
 	(LOCK TABLE ONLY $table:literal IN $mode:tt MODE NOWAIT) => {
-        concat!("LOCK TABLE ONLY ", $table, " IN ", $crate::ast::lockmode!($mode), " MODE NOWAIT")
+        concat!("LOCK TABLE ONLY ", $table, " IN ", $crate::expr::lockmode!($mode), " MODE NOWAIT")
     };
 }
 
@@ -295,7 +295,7 @@ pub use static_table_lock;
 #[cfg(test)]
 mod row_lock_test {
     use super::{row_lock, RowLockStrength};
-    use crate::{ast::RowLockConcurrency, SqlCommand, Void};
+    use crate::{expr::RowLockConcurrency, SqlCommand, Void};
 
     #[test]
     fn row_locking_strength() {
@@ -352,7 +352,7 @@ mod row_lock_test {
 #[cfg(test)]
 mod table_lock_test {
     use crate::{
-        ast::{table_lock, TableLock, TableLockMode, TableLockWait},
+        expr::{table_lock, TableLock, TableLockMode, TableLockWait},
         SqlCommand, Void,
     };
 

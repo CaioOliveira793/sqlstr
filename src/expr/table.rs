@@ -54,7 +54,7 @@ where
 mod test {
     use super::from_tables;
     use crate::{
-        ast::{select, separator},
+        expr::{select, separator},
         test::TestArgs,
         SqlCommand,
     };

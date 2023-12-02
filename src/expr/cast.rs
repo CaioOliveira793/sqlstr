@@ -1,4 +1,4 @@
-use crate::command::{ArgumentBuffer, SqlExpr, WriteSql};
+use crate::{ArgumentBuffer, SqlExpr, WriteSql};
 
 /// **CAST** Command
 ///
@@ -7,7 +7,7 @@ use crate::command::{ArgumentBuffer, SqlExpr, WriteSql};
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::cast};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::cast};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

@@ -3,7 +3,7 @@
 //! https://www.postgresql.org/docs/current/functions.html
 
 use super::separator_optional;
-use crate::command::{ArgumentBuffer, SqlExpr, WriteSql};
+use crate::{ArgumentBuffer, SqlExpr, WriteSql};
 
 /// Postgres comparison operators
 ///
@@ -174,18 +174,18 @@ macro_rules! static_condition {
         concat!(
             $a,
             " ",
-            $crate::ast::static_comparison!($op),
+            $crate::expr::static_comparison!($op),
             " ",
             $b
         )
     };
     ($pre_logic:tt $a:literal $op:tt $b:literal) => {
         concat!(
-            $crate::ast::static_logical_op!($pre_logic),
+            $crate::expr::static_logical_op!($pre_logic),
             " ",
             $a,
             " ",
-            $crate::ast::static_comparison!($op),
+            $crate::expr::static_comparison!($op),
             " ",
             $b
         )
@@ -193,25 +193,25 @@ macro_rules! static_condition {
 
     ($a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)+) => {
         concat!(
-            $crate::ast::static_condition!($a $op $b),
+            $crate::expr::static_condition!($a $op $b),
             $(
                 " ",
-                $crate::ast::static_logical_op!($logic_op),
+                $crate::expr::static_logical_op!($logic_op),
                 " ",
-                $crate::ast::static_condition!($ax $opx $bx)
+                $crate::expr::static_condition!($ax $opx $bx)
             )+
         )
     };
     ($pre_logic:tt $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)+) => {
         concat!(
-            $crate::ast::static_logical_op!($pre_logic),
+            $crate::expr::static_logical_op!($pre_logic),
             " ",
-            $crate::ast::static_condition!($a $op $b),
+            $crate::expr::static_condition!($a $op $b),
             $(
                 " ",
-                $crate::ast::static_logical_op!($logic_op),
+                $crate::expr::static_logical_op!($logic_op),
                 " ",
-                $crate::ast::static_condition!($ax $opx $bx)
+                $crate::expr::static_condition!($ax $opx $bx)
             )+
         )
     };
@@ -223,7 +223,7 @@ pub use static_condition;
 mod test {
     use super::{ComparisonOp, LogicalOp};
     use crate::{
-        ast::{push_comparison, push_logic, Group},
+        expr::{push_comparison, push_logic, Group},
         sqlexpr, sqlvalue,
         test::TestArgs,
         SqlCommand, WriteSql,

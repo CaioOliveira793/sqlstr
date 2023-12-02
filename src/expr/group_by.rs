@@ -3,7 +3,7 @@
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::ast::static_group_by;
+/// # use squeal_builder::expr::static_group_by;
 /// const GROUP_BY_CLAUSE: &str = static_group_by!("id", "customer_id");
 ///
 /// assert_eq!(GROUP_BY_CLAUSE, "GROUP BY id, customer_id");
@@ -25,8 +25,8 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select};
-/// # use squeal_builder::ast::group_by;
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::expr::{group_by, select};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

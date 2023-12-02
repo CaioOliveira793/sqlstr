@@ -25,8 +25,8 @@ pub enum OrderByNulls {
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select};
-/// # use squeal_builder::ast::{order_by, OrderByOrd, OrderByNulls};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::expr::{select, order_by, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -40,8 +40,8 @@ pub enum OrderByNulls {
 /// In case the defaults from the database must be used, use the `Default` variant from
 /// the [OrderByOrd] and [OrderByNulls].
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select};
-/// # use squeal_builder::ast::{order_by, OrderByOrd, OrderByNulls};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::expr::{select, order_by, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -76,8 +76,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, ast::select};
-/// # use squeal_builder::ast::{order_by_expr, OrderByOrd, OrderByNulls};
+/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
+/// # use squeal_builder::expr::{select, order_by_expr, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -122,7 +122,7 @@ macro_rules! order_by_criteria {
         "DESC"
     };
     (USING $op:tt) => {
-        concat!("USING ", $crate::ast::static_comparison!($op))
+        concat!("USING ", $crate::expr::static_comparison!($op))
     };
 
     (NULLS FIRST) => {
@@ -141,7 +141,7 @@ macro_rules! order_by_criteria {
     (USING $op:tt NULLS FIRST) => {
         concat!(
             "USING ",
-            $crate::ast::static_comparison!($op),
+            $crate::expr::static_comparison!($op),
             " NULLS FIRST"
         )
     };
@@ -155,7 +155,7 @@ macro_rules! order_by_criteria {
     (USING $op:tt NULLS LAST) => {
         concat!(
             "USING ",
-            $crate::ast::static_comparison!($op),
+            $crate::expr::static_comparison!($op),
             " NULLS LAST"
         )
     };
@@ -170,7 +170,7 @@ macro_rules! nested_order_by {
         concat!(
             ", ",
             $col,
-			$($crate::ast::nested_order_by!($colx $(ord($($rest)+))?)),*
+			$($crate::expr::nested_order_by!($colx $(ord($($rest)+))?)),*
         )
     };
     ($col:literal ord($($criteria:tt)+)$(,)? $($colx:literal $(ord($($rest:tt)+))?),*) => {
@@ -178,8 +178,8 @@ macro_rules! nested_order_by {
             ", ",
             $col,
 			" ",
-    		$crate::ast::order_by_criteria!($($criteria)+),
-    		$($crate::ast::nested_order_by!($colx $(ord($($rest)+))?)),*
+    		$crate::expr::order_by_criteria!($($criteria)+),
+    		$($crate::expr::nested_order_by!($colx $(ord($($rest)+))?)),*
         )
     };
 }
@@ -193,7 +193,7 @@ macro_rules! static_order_by {
         concat!(
             "ORDER BY ",
             $col,
-			$($crate::ast::nested_order_by!($colx $(ord($($rest)+))?)),*
+			$($crate::expr::nested_order_by!($colx $(ord($($rest)+))?)),*
         )
     };
     ($col:literal ord($($criteria:tt)+)$(,)? $($colx:literal $(ord($($rest:tt)+))?),*) => {
@@ -201,8 +201,8 @@ macro_rules! static_order_by {
             "ORDER BY ",
             $col,
 			" ",
-    		$crate::ast::order_by_criteria!($($criteria)+),
-    		$($crate::ast::nested_order_by!($colx $(ord($($rest)+))?)),*
+    		$crate::expr::order_by_criteria!($($criteria)+),
+    		$($crate::expr::nested_order_by!($colx $(ord($($rest)+))?)),*
         )
     };
 }

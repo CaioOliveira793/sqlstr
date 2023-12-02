@@ -7,7 +7,7 @@ use crate::{ArgumentBuffer, WriteSql};
 ///
 /// ```
 /// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::ast::{values_iter, select, separator};
+/// # use squeal_builder::expr::{values_iter, select, separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -88,7 +88,7 @@ mod test {
 
     use super::*;
     use crate::{
-        ast::{select, separator},
+        expr::{select, separator},
         test::{display_iter, TestArgs},
         SqlCommand,
     };
