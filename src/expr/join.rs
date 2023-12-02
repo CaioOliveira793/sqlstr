@@ -25,8 +25,8 @@ impl JoinType {
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::expr::{cross_join};
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{cross_join};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -50,8 +50,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::expr::{join, JoinType};
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -76,8 +76,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::expr::{join_on, join, JoinType};
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{join_on, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -101,8 +101,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::expr::{join_using, join, JoinType};
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{join_using, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

@@ -6,8 +6,8 @@ use crate::{ArgumentBuffer, WriteSql};
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr};
-/// # use squeal_builder::expr::{values_iter, select, separator};
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{values_iter, select, separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

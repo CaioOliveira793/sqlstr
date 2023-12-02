@@ -8,7 +8,7 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::select};
+/// # use squeal::{SqlCommand, Void, SqlExpr, expr::select};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -33,7 +33,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::select_all};
+/// # use squeal::{SqlCommand, Void, SqlExpr, expr::select_all};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -58,7 +58,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal_builder::{SqlCommand, Void, SqlExpr, expr::select_distinct};
+/// # use squeal::{SqlCommand, Void, SqlExpr, expr::select_distinct};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
