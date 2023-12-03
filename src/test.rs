@@ -2,7 +2,6 @@ use alloc::string::String;
 use core::fmt::{self, Display, Write};
 use core::ops::Deref;
 
-use crate::error::SqlError;
 use crate::ArgumentBuffer;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -43,7 +42,7 @@ where
     }
 }
 
-pub fn display_iter<'a, I, T>(iter: I) -> Result<String, SqlError<fmt::Error>>
+pub fn display_iter<'a, I, T>(iter: I) -> Result<String, fmt::Error>
 where
     I: IntoIterator<Item = &'a T>,
     T: Display + ?Sized + 'a,
@@ -52,14 +51,10 @@ where
     buffer.push('[');
     let mut iter = iter.into_iter();
     if let Some(item) = iter.next() {
-        buffer
-            .write_fmt(format_args!("{item}"))
-            .map_err(SqlError::Argument)?;
+        buffer.write_fmt(format_args!("{item}"))?;
     }
     for item in iter {
-        buffer
-            .write_fmt(format_args!(",{item}"))
-            .map_err(SqlError::Argument)?;
+        buffer.write_fmt(format_args!(",{item}"))?;
     }
     buffer.push(']');
     Ok(buffer)
