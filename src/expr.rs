@@ -1,6 +1,8 @@
 mod cast;
 mod column;
 mod condition;
+mod condition_macros;
+mod filter;
 mod group;
 mod group_by;
 mod join;
@@ -15,6 +17,8 @@ mod value;
 pub use cast::*;
 pub use column::*;
 pub use condition::*;
+pub use condition_macros::*;
+pub use filter::*;
 pub use group::*;
 pub use group_by::*;
 pub use join::*;

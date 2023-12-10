@@ -93,7 +93,8 @@ where
     }
 
     // "SELECT $1   "
-    for ch in sql.as_command().chars().rev().skip_while(|ch| *ch == ' ') {
+    // FIXME: prevent match "$   "
+    for ch in sql.as_command().trim_end_matches(' ').chars().rev() {
         match ch {
             '0'..='9' => continue,
             '$' => {
@@ -157,7 +158,7 @@ pub fn separator_optional<Sql, Arg>(sql: &mut Sql)
 where
     Sql: WriteSql<Arg>,
 {
-    if sql.as_command().is_empty() {
+    if sql.as_command().is_empty() || sql.as_command().ends_with('(') {
         return;
     }
 

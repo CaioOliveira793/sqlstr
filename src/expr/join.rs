@@ -55,13 +55,13 @@ where
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
-/// join(&mut sql, JoinType::Left, "user");
+/// join(&mut sql, JoinType::Left, "user", Some("u"));
 ///
-/// assert_eq!(sql.as_command(), "LEFT JOIN user");
+/// assert_eq!(sql.as_command(), "LEFT JOIN user AS u");
 /// # Ok(())
 /// # }
 /// ```
-pub fn join<Sql, Arg>(sql: &mut Sql, typ: JoinType, table: &str)
+pub fn join<Sql, Arg>(sql: &mut Sql, typ: JoinType, table: &str, alias: Option<&str>)
 where
     Sql: WriteSql<Arg>,
 {
@@ -69,6 +69,10 @@ where
     sql.push_cmd(typ.as_str());
     sql.push_cmd(" JOIN ");
     sql.push_cmd(table);
+    if let Some(alias) = alias {
+        sql.push_cmd(" AS ");
+        sql.push_cmd(alias);
+    }
 }
 
 /// Starts a join condition.
@@ -81,7 +85,7 @@ where
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
-/// join(&mut sql, JoinType::Inner, "customer");
+/// join(&mut sql, JoinType::Inner, "customer", None);
 /// join_on(&mut sql);
 ///
 /// assert_eq!(sql.as_command(), "INNER JOIN customer ON");
@@ -106,14 +110,14 @@ where
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
-/// join(&mut sql, JoinType::Right, "customer");
+/// join(&mut sql, JoinType::Right, "customer", Some("c"));
 /// join_using(&mut sql, ["attendant_id"]);
 ///
-/// assert_eq!(sql.as_command(), "RIGHT JOIN customer USING (attendant_id)");
+/// assert_eq!(sql.as_command(), "RIGHT JOIN customer AS c USING (attendant_id)");
 /// # Ok(())
 /// # }
 /// ```
-pub fn join_using<'t, Sql, Arg, I>(sql: &mut Sql, tables: I)
+pub fn join_using<'t, Sql, Arg, I>(sql: &mut Sql, columns: I)
 where
     Sql: WriteSql<Arg>,
     I: IntoIterator<Item = &'t str>,
@@ -121,7 +125,7 @@ where
     separator_optional(sql);
     sql.push_cmd("USING (");
 
-    let mut tbls = tables.into_iter();
+    let mut tbls = columns.into_iter();
     if let Some(tbl) = tbls.next() {
         sql.push_cmd(tbl);
     }

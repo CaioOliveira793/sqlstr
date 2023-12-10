@@ -1,279 +1,274 @@
-//! Postgres supported functions and operators
-//!
-//! https://www.postgresql.org/docs/current/functions.html
+//! Operators and functions.
 
-use super::separator_optional;
+pub mod math;
+
+use super::{separator, separator_optional};
 use crate::{ArgumentBuffer, SqlExpr, WriteSql};
 
-/// Postgres comparison operators
-///
-/// https://www.postgresql.org/docs/current/functions-comparison.html
-#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub enum ComparisonOp {
-    Equal,
-    NotEqual,
-    GreaterThan,
-    GreaterThanOrEqual,
-    LessThan,
-    LessThanOrEqual,
-    Is,
+pub trait BinaryOperator: private::Sealed {
+    fn push_operator<Sql, Arg>(&self, sql: &mut Sql)
+    where
+        Sql: WriteSql<Arg>;
 }
 
-impl ComparisonOp {
+pub trait UnaryOperator: private::Sealed {
+    fn push_operator<Sql, Arg>(&self, sql: &mut Sql)
+    where
+        Sql: WriteSql<Arg>;
+}
+
+mod private {
+    pub trait Sealed {}
+}
+
+/// Comparison operators
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum Cmp {
+    /// Equal `==`
+    Eq,
+    /// Not equal `!=`
+    Neq,
+    /// Greater than `>`
+    Gt,
+    //// Greater than or equal `>=`
+    Gte,
+    /// Less than `<`
+    Lt,
+    /// Less than or equal `<=`
+    Lte,
+}
+
+impl Cmp {
     pub const fn as_str(&self) -> &'static str {
         match self {
-            Self::Equal => "=",
-            Self::NotEqual => "<>",
-            Self::GreaterThan => ">",
-            Self::GreaterThanOrEqual => ">=",
-            Self::LessThan => "<",
-            Self::LessThanOrEqual => "<=",
-            Self::Is => "IS",
+            Self::Eq => "=",
+            Self::Neq => "<>",
+            Self::Gt => ">",
+            Self::Gte => ">=",
+            Self::Lt => "<",
+            Self::Lte => "<=",
         }
     }
 }
 
-/// Postgres logical operators
-///
-/// https://www.postgresql.org/docs/current/functions-logical.html
-pub enum LogicalOp {
-    And,
-    Or,
-    Not,
+impl private::Sealed for Cmp {}
+
+impl BinaryOperator for Cmp {
+    fn push_operator<Sql, Arg>(&self, sql: &mut Sql)
+    where
+        Sql: WriteSql<Arg>,
+    {
+        sql.push_cmd(self.as_str())
+    }
 }
 
-impl LogicalOp {
+/// Logic binary operators
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum LogicBi {
+    And,
+    Or,
+}
+
+impl LogicBi {
     pub const fn as_str(&self) -> &'static str {
         match *self {
             Self::And => "AND",
             Self::Or => "OR",
-            Self::Not => "NOT",
         }
     }
 }
 
-/// Postgres available Mathematical functions and operators
-///
-/// - [Operators](https://www.postgresql.org/docs/current/functions-math.html)
-pub enum MathOp {
-    /// Adition
-    ///
-    /// 2 + 3
-    Addition,
-    /// Subtration
-    ///
-    /// 2 - 3
-    Subtraction,
-    /// Negation
-    ///
-    /// - (-1)
-    Negation,
-    /// Multiplication
-    ///
-    /// 5 * 2
-    Multiplication,
-    Division,
-    Modulo,
-    Exponentiation,
-    SquareRoot,
-    CubeRoot,
-    /// Factorial prefix operator
-    ///
-    /// !! 5
-    Factorial,
-    Absolute,
-    BitwiseAnd,
-    BitwiseOr,
-    BitwiseXor,
-    BitwiseNot,
-    ShiftLeft,
-    ShiftRight,
+impl private::Sealed for LogicBi {}
+
+impl BinaryOperator for LogicBi {
+    fn push_operator<Sql, Arg>(&self, sql: &mut Sql)
+    where
+        Sql: WriteSql<Arg>,
+    {
+        sql.push_cmd(self.as_str())
+    }
 }
 
-pub fn push_comparison<Sql, Arg, T>(
-    sql: &mut Sql,
-    op: ComparisonOp,
-    rhs: SqlExpr<'_, T>,
-) -> Result<(), Arg::Error>
+/// Logic unary operators
+#[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum LogicUn {
+    Not,
+}
+
+impl LogicUn {
+    pub const fn as_str(&self) -> &'static str {
+        match *self {
+            LogicUn::Not => "NOT",
+        }
+    }
+}
+
+impl private::Sealed for LogicUn {}
+
+impl UnaryOperator for LogicUn {
+    fn push_operator<Sql, Arg>(&self, sql: &mut Sql)
+    where
+        Sql: WriteSql<Arg>,
+    {
+        sql.push_cmd(self.as_str())
+    }
+}
+
+pub fn continue_condition<Sql, Arg>(sql: &mut Sql, op: LogicBi)
 where
     Sql: WriteSql<Arg>,
-    Arg: ArgumentBuffer<T>,
 {
+    if sql.as_command().is_empty() {
+        return;
+    }
+
+    let end = sql.as_command().trim_end_matches(' ');
+    // WHERE | ON | HAVING | ( <open group>
+    if end.ends_with("WHERE")
+        || end.ends_with("ON")
+        || end.ends_with("HAVING")
+        || end.ends_with('(')
+        || sql.as_command().is_empty()
+    {
+        return;
+    }
+
     separator_optional(sql);
     sql.push_cmd(op.as_str());
-    sql.push_cmd(" ");
+}
+
+pub fn lhs_binary_rhs<Sql, Arg, BOp, Lhs, Rhs>(
+    sql: &mut Sql,
+    lhs: SqlExpr<Lhs>,
+    op: BOp,
+    rhs: SqlExpr<Rhs>,
+) -> Result<(), <Arg as ArgumentBuffer<Lhs>>::Error>
+where
+    Sql: WriteSql<Arg>,
+    BOp: BinaryOperator,
+    Arg: ArgumentBuffer<Lhs>,
+    Arg: ArgumentBuffer<Rhs, Error = <Arg as ArgumentBuffer<Lhs>>::Error>,
+{
+    separator_optional(sql);
+
+    sql.push_expr(lhs)?;
+    separator(sql);
+    op.push_operator(sql);
+    separator(sql);
     sql.push_expr(rhs)
 }
 
-pub fn push_logic<Sql, Arg, T>(
+pub fn binary_rhs<Sql, Arg, BOp, Rhs>(
     sql: &mut Sql,
-    op: LogicalOp,
-    rhs: SqlExpr<'_, T>,
+    op: BOp,
+    rhs: SqlExpr<Rhs>,
 ) -> Result<(), Arg::Error>
 where
     Sql: WriteSql<Arg>,
-    Arg: ArgumentBuffer<T>,
+    BOp: BinaryOperator,
+    Arg: ArgumentBuffer<Rhs>,
 {
     separator_optional(sql);
-    sql.push_cmd(op.as_str());
-    sql.push_cmd(" ");
+
+    op.push_operator(sql);
+    separator(sql);
     sql.push_expr(rhs)
 }
 
-#[allow(unused_macros)]
-macro_rules! static_comparison {
-    (=) => {
-        "="
-    };
-    (!=) => {
-        "<>"
-    };
-    (>) => {
-        ">"
-    };
-    (<) => {
-        "<"
-    };
-    (>=) => {
-        ">="
-    };
-    (<=) => {
-        "<="
-    };
+pub fn unary_rhs<Sql, Arg, UOp, Rhs>(
+    sql: &mut Sql,
+    op: UOp,
+    rhs: SqlExpr<Rhs>,
+) -> Result<(), Arg::Error>
+where
+    Sql: WriteSql<Arg>,
+    UOp: UnaryOperator,
+    Arg: ArgumentBuffer<Rhs>,
+{
+    separator_optional(sql);
+
+    op.push_operator(sql);
+    separator(sql);
+    sql.push_expr(rhs)
 }
-
-#[allow(unused_macros)]
-macro_rules! static_logical_op {
-    (NOT) => {
-        "NOT"
-    };
-    (AND) => {
-        "AND"
-    };
-    (OR) => {
-        "OR"
-    };
-    (AND_NOT) => {
-        "AND NOT"
-    };
-    (OR_NOT) => {
-        "OR NOT"
-    };
-}
-
-#[allow(unused_imports)]
-pub(super) use static_comparison;
-
-#[allow(unused_imports)]
-pub(super) use static_logical_op;
-
-#[macro_export]
-macro_rules! static_condition {
-    ($a:literal $op:tt $b:literal) => {
-        concat!(
-            $a,
-            " ",
-            $crate::expr::static_comparison!($op),
-            " ",
-            $b
-        )
-    };
-    ($pre_logic:tt $a:literal $op:tt $b:literal) => {
-        concat!(
-            $crate::expr::static_logical_op!($pre_logic),
-            " ",
-            $a,
-            " ",
-            $crate::expr::static_comparison!($op),
-            " ",
-            $b
-        )
-    };
-
-    ($a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)+) => {
-        concat!(
-            $crate::expr::static_condition!($a $op $b),
-            $(
-                " ",
-                $crate::expr::static_logical_op!($logic_op),
-                " ",
-                $crate::expr::static_condition!($ax $opx $bx)
-            )+
-        )
-    };
-    ($pre_logic:tt $a:literal $op:tt $b:literal $($logic_op:tt $ax:literal $opx:tt $bx:literal)+) => {
-        concat!(
-            $crate::expr::static_logical_op!($pre_logic),
-            " ",
-            $crate::expr::static_condition!($a $op $b),
-            $(
-                " ",
-                $crate::expr::static_logical_op!($logic_op),
-                " ",
-                $crate::expr::static_condition!($ax $opx $bx)
-            )+
-        )
-    };
-}
-
-pub use static_condition;
 
 #[cfg(test)]
 mod test {
-    use super::{ComparisonOp, LogicalOp};
+    use super::{Cmp, LogicBi};
     use crate::{
-        expr::{push_comparison, push_logic, Group},
+        expr::{
+            binary_rhs, continue_condition, lhs_binary_rhs, math::MathBi, unary_rhs, Group, LogicUn,
+        },
         sqlexpr, sqlvalue,
         test::TestArgs,
-        SqlCommand, WriteSql,
+        SqlCommand, SqlExpr,
     };
 
     #[test]
-    fn static_condition_macro() {
-        assert_eq!(
-            static_condition!(NOT "access_history.user_id" = "user.id"),
-            "NOT access_history.user_id = user.id"
-        );
-        assert_eq!(
-            static_condition!("access_history.user_id" > "user.id"),
-            "access_history.user_id > user.id"
-        );
-        assert_eq!(
-            static_condition!(AND_NOT "access_history.user_id" >= "user.id"),
-            "AND NOT access_history.user_id >= user.id"
-        );
-        assert_eq!(
-            static_condition!("user.id" = "access_history.user_id" OR "user.updated" < "access_history.created"),
-            "user.id = access_history.user_id OR user.updated < access_history.created"
-        );
-        assert_eq!(
-            static_condition!("user.id" != "access_history.user_id"),
-            "user.id <> access_history.user_id"
-        );
-        assert_eq!(
-            static_condition!(NOT "user.id" = "access_history.user_id" AND_NOT "user.updated" < "access_history.created"),
-            "NOT user.id = access_history.user_id AND NOT user.updated < access_history.created"
-        )
-    }
-
-    #[test]
-    fn condition_expr() {
-        let mut sql: SqlCommand<TestArgs> = Default::default();
+    fn condition_comparison() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+        continue_condition(&mut sql, LogicBi::And);
         {
             let mut group = Group::open(&mut sql);
-            group.push_cmd("user.id");
-            push_comparison(&mut group, ComparisonOp::Equal, sqlvalue(32)).unwrap();
-            push_logic(
+            lhs_binary_rhs(
                 &mut group,
-                LogicalOp::And,
-                sqlexpr::<&str>("access.created"),
+                sqlexpr::<&str>("user.id"),
+                Cmp::Eq,
+                sqlvalue(32),
             )
             .unwrap();
-            push_comparison(&mut group, ComparisonOp::GreaterThanOrEqual, sqlvalue(2040)).unwrap();
+            continue_condition(&mut group, LogicBi::And);
+            lhs_binary_rhs(
+                &mut group,
+                sqlexpr::<&str>("access.created"),
+                Cmp::Gte,
+                sqlvalue(2040),
+            )
+            .unwrap();
         }
 
         assert_eq!(sql.as_command(), "(user.id = $1 AND access.created >= $2)");
         assert_eq!(sql.arguments.as_str(), "32;2040;");
+    }
+
+    #[test]
+    fn condition_math() {
+        let mut sql: SqlCommand<TestArgs> = SqlCommand::default();
+        continue_condition(&mut sql, LogicBi::And);
+
+        {
+            let mut group = Group::open(&mut sql);
+            lhs_binary_rhs(
+                &mut group,
+                sqlexpr::<u8>("column1"),
+                MathBi::Add,
+                SqlExpr::Value(30),
+            )
+            .unwrap();
+            binary_rhs(&mut group, Cmp::Gt, sqlexpr::<u8>("column2")).unwrap();
+
+            continue_condition(&mut group, LogicBi::And);
+
+            lhs_binary_rhs(
+                &mut group,
+                sqlexpr::<u8>("column1"),
+                Cmp::Eq,
+                sqlexpr::<u8>("column3"),
+            )
+            .unwrap();
+        }
+
+        continue_condition(&mut sql, LogicBi::Or);
+
+        unary_rhs(&mut sql, LogicUn::Not, sqlexpr::<u8>("column4")).unwrap();
+        binary_rhs(&mut sql, Cmp::Lt, SqlExpr::Value(10)).unwrap();
+
+        assert_eq!(
+            sql.as_command(),
+            "(column1 + $1 > column2 AND column1 = column3) OR NOT column4 < $2"
+        );
     }
 }
