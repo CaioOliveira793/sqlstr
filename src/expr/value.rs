@@ -1,25 +1,50 @@
-use super::item_separator_optional;
+use super::{item_separator_optional, separator_optional};
 use crate::{ArgumentBuffer, WriteSql};
 
-/// Push a list of values into a sql command.
+/// Write a `VALUES` clause to start a list of expressions to be used in the
+/// `INSERT` command.
 ///
 /// # Example
 ///
 /// ```
 /// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{values_iter, select, separator};
+/// # use squeal::expr::{values, insert_into, columns_iter, write_iter};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// values(&mut sql);
+///
+/// assert_eq!(sql.as_command(), "VALUES");
+/// # Ok(())
+/// # }
+/// ```
+pub fn values<Sql, Arg>(sql: &mut Sql)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("VALUES");
+}
+
+/// Write a list of values into the sql command.
+///
+/// # Example
+///
+/// ```
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{write_iter, select, separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
 /// select(&mut sql);
 /// separator(&mut sql);
-/// values_iter(&mut sql, [0, -100, 47, 69])?;
+/// write_iter(&mut sql, [0, -100, 47, 69])?;
 ///
 /// assert_eq!(sql.as_command(), "SELECT $1, $2, $3, $4");
 /// # Ok(())
 /// # }
 /// ```
-pub fn values_iter<Sql, Arg, I, T>(sql: &mut Sql, values: I) -> Result<(), Arg::Error>
+pub fn write_iter<Sql, Arg, I, T>(sql: &mut Sql, values: I) -> Result<(), Arg::Error>
 where
     Sql: WriteSql<Arg>,
     Arg: ArgumentBuffer<T>,
@@ -41,7 +66,7 @@ where
 }
 
 #[macro_export]
-macro_rules! values {
+macro_rules! write_variadic {
     (ArgumentBufferError = $argbuf_error_type:ty; $sql:expr, $value1:expr) => {{
         let sql = $sql;
         item_separator_optional(sql);
@@ -80,7 +105,7 @@ macro_rules! values {
     }};
 }
 
-pub use values;
+pub use write_variadic;
 
 #[cfg(test)]
 mod test {
@@ -99,7 +124,7 @@ mod test {
 
         select(&mut sql);
         separator(&mut sql);
-        values_iter(&mut sql, [10, -100, 0, -999]).unwrap();
+        write_iter(&mut sql, [10, -100, 0, -999]).unwrap();
 
         assert_eq!(sql.command, "SELECT $1, $2, $3, $4");
         assert_eq!(sql.arguments.as_str(), "10;-100;0;-999;");
@@ -111,8 +136,8 @@ mod test {
 
         select(&mut sql);
         separator(&mut sql);
-        values_iter(&mut sql, [10, -100, 0, -999]).unwrap();
-        values_iter(&mut sql, ["r", "u", "s", "t"]).unwrap();
+        write_iter(&mut sql, [10, -100, 0, -999]).unwrap();
+        write_iter(&mut sql, ["r", "u", "s", "t"]).unwrap();
 
         assert_eq!(sql.command, "SELECT $1, $2, $3, $4, $5, $6, $7, $8");
         assert_eq!(sql.arguments.as_str(), "10;-100;0;-999;r;u;s;t;");
@@ -125,7 +150,7 @@ mod test {
         select(&mut sql);
         separator(&mut sql);
 
-        values!(ArgumentBufferError = core::fmt::Error; &mut sql, true).unwrap();
+        write_variadic!(ArgumentBufferError = core::fmt::Error; &mut sql, true).unwrap();
 
         assert_eq!(sql.as_command(), "SELECT $1");
         assert_eq!(sql.arguments.as_str(), "true;");
@@ -138,7 +163,7 @@ mod test {
         select(&mut sql);
         separator(&mut sql);
 
-        values!(
+        write_variadic!(
             ArgumentBufferError = core::fmt::Error;
             &mut sql,
             "str",

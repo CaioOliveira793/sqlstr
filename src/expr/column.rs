@@ -1,6 +1,43 @@
 use alloc::{borrow::Cow, string::String, vec::Vec};
 use core::{borrow::Borrow, ops::Deref};
 
+use super::separator_optional;
+use crate::WriteSql;
+
+/// Write a list of columns from a iterator into the sql command buffer.
+///
+/// # Example
+///
+/// ```
+/// # use squeal::{SqlCommand, Void, SqlExpr};
+/// # use squeal::expr::{columns_iter};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// columns_iter(&mut sql, ["id", "name", "email", "created"]);
+///
+/// assert_eq!(sql.as_command(), "id, name, email, created");
+/// # Ok(())
+/// # }
+/// ```
+pub fn columns_iter<'c, Sql, Arg, I>(sql: &mut Sql, columns: I)
+where
+    Sql: WriteSql<Arg>,
+    I: IntoIterator<Item = &'c str>,
+{
+    separator_optional(sql);
+
+    let mut cols = columns.into_iter();
+    if let Some(first) = cols.next() {
+        sql.push_cmd(first);
+    }
+
+    for col in cols {
+        sql.push_cmd(", ");
+        sql.push_cmd(col);
+    }
+}
+
 #[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ColumnExpr<'c>(Cow<'c, str>);
