@@ -1,6 +1,7 @@
 mod cast;
 mod column;
 mod condition;
+mod delete;
 mod expression;
 mod filter;
 mod group;
@@ -20,6 +21,7 @@ mod value;
 pub use cast::*;
 pub use column::*;
 pub use condition::*;
+pub use delete::*;
 pub use expression::*;
 pub use filter::*;
 pub use group::*;
