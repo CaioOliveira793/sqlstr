@@ -1,9 +1,9 @@
 use std::convert::Infallible;
 use std::time::Duration;
 
+use sqlstr::{expr, ArgumentBuffer, SqlCommand};
 use sqlx::postgres::PgArguments;
 use sqlx::{Arguments, Encode, Postgres, Type};
-use squeal::{expr, ArgumentBuffer, SqlCommand};
 
 #[derive(Default)]
 struct PostgresArg {
@@ -28,7 +28,7 @@ where
     }
 }
 
-const DEFAULT_DATABASE_URL: &str = "postgres://root:root@localhost:5432/squeal_example";
+const DEFAULT_DATABASE_URL: &str = "postgres://root:root@localhost:5432/sqlstr_example";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use sqlx::postgres::PgPoolOptions;
@@ -79,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(num, -1);
     assert_eq!(list, vec!["array", "of", "str"]);
     assert!(!boolean);
-    assert_eq!(strr, "Squeal");
+    assert_eq!(strr, "sqlstr");
 
     println!("all values are correct, exiting!");
 
@@ -97,7 +97,7 @@ fn make_sql_command() -> Result<SqlCommand<PostgresArg>, Infallible> {
     expr::item_separator(&mut sql);
     sql.push_value(false)?;
     expr::item_separator(&mut sql);
-    sql.push_value("Squeal")?;
+    sql.push_value("sqlstr")?;
 
     Ok(sql)
 }

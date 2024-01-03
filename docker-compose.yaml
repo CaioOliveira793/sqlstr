@@ -1,15 +1,15 @@
 version: '3.7'
 
 services:
-  squeal_postgres_example:
-    container_name: squeal_postgres_example
+  sqlstr_postgres_example:
+    container_name: sqlstr_postgres_example
     image: docker.io/library/postgres:16-bullseye
     networks:
     - default
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: squeal_example
+      POSTGRES_DB: sqlstr_example
       PGDATA: "/var/lib/postgresql/data"
     ports:
     - 5432:5432

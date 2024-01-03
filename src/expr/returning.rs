@@ -8,7 +8,7 @@ use super::separator_optional;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::returning};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::returning};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

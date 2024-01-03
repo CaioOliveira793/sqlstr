@@ -7,8 +7,8 @@ use crate::{ArgumentBuffer, WriteSql};
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{values, insert_into, columns_iter, write_iter};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{values, insert_into, columns_iter, write_iter};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -31,8 +31,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{write_iter, select, separator};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{write_iter, select, separator};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

@@ -25,8 +25,8 @@ impl JoinType {
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{cross_join};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{cross_join};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -50,8 +50,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{join, JoinType};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -80,8 +80,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{join_on, join, JoinType};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{join_on, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -105,8 +105,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{join_using, join, JoinType};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{join_using, join, JoinType};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

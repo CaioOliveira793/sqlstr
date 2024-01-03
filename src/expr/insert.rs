@@ -6,8 +6,8 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{insert};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{insert};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -31,8 +31,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{insert_into};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{insert_into};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -69,8 +69,8 @@ pub enum ConflictAction {
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{on_conflict, ConflictAction, ConflictTarget};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{on_conflict, ConflictAction, ConflictTarget};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

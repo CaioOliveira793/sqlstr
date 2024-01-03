@@ -9,8 +9,8 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{columns_iter};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{columns_iter};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

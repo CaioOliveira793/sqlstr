@@ -6,8 +6,8 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::delete;
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::delete;
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -31,8 +31,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{delete_from};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{delete_from};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -57,8 +57,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{delete_using};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{delete_using};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -82,8 +82,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{delete_using_iter};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{delete_using_iter};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

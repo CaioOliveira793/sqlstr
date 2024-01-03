@@ -7,7 +7,7 @@ use super::separator_optional;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::filter_where};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::filter_where};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -30,7 +30,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::filter_having};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::filter_having};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

@@ -25,8 +25,8 @@ pub enum OrderByNulls {
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{select, order_by, OrderByOrd, OrderByNulls};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{select, order_by, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -40,8 +40,8 @@ pub enum OrderByNulls {
 /// In case the defaults from the database must be used, use the `Default` variant from
 /// the [OrderByOrd] and [OrderByNulls].
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{select, order_by, OrderByOrd, OrderByNulls};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{select, order_by, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -76,8 +76,8 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr};
-/// # use squeal::expr::{select, order_by_expr, OrderByOrd, OrderByNulls};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{select, order_by_expr, OrderByOrd, OrderByNulls};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();

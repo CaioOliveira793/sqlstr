@@ -6,7 +6,7 @@ use crate::WriteSql;
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::update};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::update};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -30,7 +30,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::update_table};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::update_table};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -60,7 +60,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::set_column};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::set_column};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
@@ -86,7 +86,7 @@ where
 /// # Example
 ///
 /// ```
-/// # use squeal::{SqlCommand, Void, SqlExpr, expr::set_tuple};
+/// # use sqlstr::{SqlCommand, Void, SqlExpr, expr::set_tuple};
 /// # use core::convert::Infallible;
 /// # fn main() -> Result<(), Infallible> {
 /// let mut sql: SqlCommand<Void> = SqlCommand::default();
