@@ -1,5 +1,9 @@
 //! Operators and functions.
 
+// TODO: add most of the postgres functions
+// https://www.postgresql.org/docs/current/functions.html
+
+pub mod comparison;
 pub mod math;
 
 use super::{separator, separator_optional};
