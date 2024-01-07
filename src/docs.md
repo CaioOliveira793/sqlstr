@@ -20,9 +20,56 @@ TODO:
 
 TODO: how `WriteSql::push_value()` works.
 
+## Composition
+
+TODO: show how complex queries can be abstracted with functions.
+
+```rust
+# use core::convert::Infallible;
+use sqlstr::{WriteSql, ArgumentBuffer, SqlCommand, SqlExpr, Void, sqlexpr, sqlvalue};
+use sqlstr::expr::{select, column, from_table, filter_where, lhs_binary_rhs, Cmp};
+
+fn select_user_by_id<Sql, Arg>(
+	sql: &mut Sql,
+	id: u64
+) -> Result<(), <Arg as ArgumentBuffer<u64>>::Error>
+where
+	Sql: WriteSql<Arg>,
+	Arg: ArgumentBuffer<u64>,
+{
+	select(sql);
+	column(sql, "*");
+
+	from_table(sql, "user");
+
+	filter_where(sql);
+	lhs_binary_rhs(
+		sql,
+		SqlExpr::<u64>::Expr("id"),
+		Cmp::Eq,
+		SqlExpr::Value(id),
+	)?;
+
+	Ok(())
+}
+
+# fn main() -> Result<(), Infallible> {
+let mut sql: SqlCommand<Void> = SqlCommand::default();
+
+select_user_by_id(&mut sql, 97)?;
+
+assert_eq!(sql.as_command(), "SELECT * FROM user WHERE id = $1");
+# Ok(())
+# }
+```
+
+## Raw query
+
+TOOD: show raw query usage
+
 ## No std
 
-TODO:
+TODO: add `alloc` feature to opt-in the alloc crate
 
 # Usage
 
@@ -89,7 +136,94 @@ assert_eq!(sql.as_command(), "INSERT INTO user (id, name, email) VALUES ($1, $2,
 
 ## UPDATE
 
+```rust
+# use core::convert::Infallible;
+use sqlstr::{WriteSql, SqlCommand, SqlExpr, Void, sqlexpr, sqlvalue};
+use sqlstr::expr::{
+	update_table, set_update, set_column, separator, item_separator, filter_where,
+	lhs_binary_rhs, Cmp, math::MathBi
+};
+
+# fn main() -> Result<(), Infallible> {
+let mut sql: SqlCommand<Void> = SqlCommand::default();
+
+update_table(&mut sql, "product");
+set_update(&mut sql);
+
+set_column(&mut sql, "price");
+lhs_binary_rhs(
+	&mut sql,
+	SqlExpr::<&str>::Expr("price"),
+	MathBi::Add,
+	SqlExpr::Value(50)
+)?;
+item_separator(&mut sql);
+
+set_column(&mut sql, "discount");
+separator(&mut sql);
+sql.push_value(None as Option<f64>);
+item_separator(&mut sql);
+
+set_column(&mut sql, "image");
+separator(&mut sql);
+sql.push_cmd("DEFAULT");
+
+filter_where(&mut sql);
+lhs_binary_rhs(
+	&mut sql,
+	SqlExpr::<&str>::Expr("sku"),
+	Cmp::Eq,
+	SqlExpr::Value(32_u64),
+)?;
+
+assert_eq!(sql.as_command(), "UPDATE product SET price = price + $1, discount = $2, image = DEFAULT WHERE sku = $3");
+# Ok(())
+# }
+```
+
 ## DELETE
+
+```rust
+# use core::convert::Infallible;
+use sqlstr::{WriteSql, SqlCommand, SqlExpr, Void, sqlexpr, sqlvalue};
+use sqlstr::expr::{delete_from, filter_where, lhs_binary_rhs, continue_condition, Cmp, Group, LogicBi};
+
+# fn main() -> Result<(), Infallible> {
+let mut sql: SqlCommand<Void> = SqlCommand::default();
+
+delete_from(&mut sql, "product");
+
+filter_where(&mut sql);
+
+let mut group = Group::open(&mut sql);
+lhs_binary_rhs(
+	&mut group,
+	SqlExpr::<&str>::Expr("price"),
+	Cmp::Lte,
+	SqlExpr::Value(100.0),
+)?;
+continue_condition(&mut group, LogicBi::And);
+lhs_binary_rhs(
+	&mut group,
+	SqlExpr::<&str>::Expr("price"),
+	Cmp::Gt,
+	SqlExpr::Value(80.0),
+)?;
+group.close();
+
+continue_condition(&mut sql, LogicBi::Or);
+
+lhs_binary_rhs(
+	&mut sql,
+	SqlExpr::<&str>::Expr("ratings"),
+	Cmp::Lt,
+	SqlExpr::Value(0.2),
+)?;
+
+assert_eq!(sql.as_command(), "DELETE FROM product WHERE (price <= $1 AND price > $2) OR ratings < $3");
+# Ok(())
+# }
+```
 
 # Feature flags
 

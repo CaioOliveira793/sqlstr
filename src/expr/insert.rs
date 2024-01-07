@@ -51,6 +51,34 @@ where
     sql.push_cmd(table);
 }
 
+/// Write an `INSERT INTO <table> AS <alias>` clause to start an insert command with a
+/// table and an alias.
+///
+/// # Example
+///
+/// ```
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{insert_into};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+/// insert_into(&mut sql, "user");
+///
+/// assert_eq!(sql.as_command(), "INSERT INTO user");
+/// # Ok(())
+/// # }
+/// ```
+pub fn insert_into_as<Sql, Arg>(sql: &mut Sql, table: &str, alias: &str)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd("INSERT INTO ");
+    sql.push_cmd(table);
+    sql.push_cmd(" AS ");
+    sql.push_cmd(alias);
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConflictTarget<'expr> {
     Constraint(&'expr str),
