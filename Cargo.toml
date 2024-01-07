@@ -21,7 +21,13 @@ codegen-units = 1
 
 [[example]]
 name = "sqlx"
+test = true
+
+[[example]]
+name = "small-binary"
+test = true
 
 [dev-dependencies]
+libc = { version = "0.2.151", default-features = false }
 sqlx = { version = "0.7.3", default-features = false, features = ["postgres", "runtime-tokio"] }
 tokio = { version = "1.34.0", default-features = false, features = ["rt", "net"] }
