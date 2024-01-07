@@ -1,5 +1,6 @@
 use core::marker::PhantomData;
 
+use super::separator_optional;
 use crate::WriteSql;
 
 pub struct Group<'cmd, Sql: WriteSql<Arg>, Arg>(&'cmd mut Sql, PhantomData<Arg>);
@@ -8,9 +9,10 @@ impl<'cmd, Sql, Arg> Group<'cmd, Sql, Arg>
 where
     Sql: WriteSql<Arg>,
 {
-    pub fn open(command: &'cmd mut Sql) -> Self {
-        command.push_cmd("(");
-        Self(command, PhantomData)
+    pub fn open(sql: &'cmd mut Sql) -> Self {
+        separator_optional(sql);
+        sql.push_cmd("(");
+        Self(sql, PhantomData)
     }
 
     pub fn close(self) {

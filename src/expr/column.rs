@@ -38,6 +38,48 @@ where
     }
 }
 
+/// Write a single column into the sql command.
+///
+/// # Example
+///
+/// ```
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::column;
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+///
+/// column(&mut sql, "id");
+///
+/// assert_eq!(sql.as_command(), "id");
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Optionally, a separator is inserted if needed.
+///
+/// ```
+/// # use sqlstr::{SqlCommand, Void, SqlExpr};
+/// # use sqlstr::expr::{select, column};
+/// # use core::convert::Infallible;
+/// # fn main() -> Result<(), Infallible> {
+/// let mut sql: SqlCommand<Void> = SqlCommand::default();
+///
+/// select(&mut sql);
+/// column(&mut sql, "id");
+///
+/// assert_eq!(sql.as_command(), "SELECT id");
+/// # Ok(())
+/// # }
+/// ```
+pub fn column<Sql, Arg>(sql: &mut Sql, column: &str)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+    sql.push_cmd(column);
+}
+
 #[cfg_attr(any(feature = "fmt", test, debug_assertions), derive(Debug))]
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ColumnExpr<'c>(Cow<'c, str>);

@@ -50,6 +50,16 @@ where
     }
 }
 
+pub fn from_table<Sql, Arg>(sql: &mut Sql, table: &str)
+where
+    Sql: WriteSql<Arg>,
+{
+    separator_optional(sql);
+
+    sql.push_cmd("FROM ");
+    sql.push_cmd(table);
+}
+
 #[cfg(test)]
 mod test {
     use super::from_tables;

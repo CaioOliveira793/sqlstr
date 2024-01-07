@@ -3,7 +3,7 @@ use crate::{ArgumentBuffer, WriteSql};
 
 /// Writes a LIMIT clause into a sql writer.
 ///
-/// LIMIT <count>
+/// `LIMIT <count>`
 ///
 /// # Example
 ///
@@ -30,7 +30,7 @@ where
 
 /// Writes a offset clause into a sql writer.
 ///
-/// OFFSET <start>
+/// `OFFSET <start>`
 ///
 /// # Example
 ///

@@ -80,9 +80,9 @@ pub enum ConflictAction {
 /// # Ok(())
 /// # }
 /// ```
-pub fn on_conflict<'expr, Sql, Arg>(
+pub fn on_conflict<Sql, Arg>(
     sql: &mut Sql,
-    target: Option<ConflictTarget<'expr>>,
+    target: Option<ConflictTarget<'_>>,
     action: ConflictAction,
 ) where
     Sql: WriteSql<Arg>,

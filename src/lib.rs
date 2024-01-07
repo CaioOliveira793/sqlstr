@@ -1,3 +1,4 @@
+#![doc = include_str!("./docs.md")]
 #![no_std]
 
 extern crate alloc;
